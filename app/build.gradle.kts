@@ -14,6 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.example.weatherapp"
         minSdk = 29
+        //noinspection OldTargetApi
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -57,6 +58,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.play.services.location)
     implementation(libs.retrofit)
+    implementation(libs.logging.interceptor)
     implementation(libs.converter.gson)
     implementation(libs.adapter.rxjava3)
     implementation(libs.rxandroid)
