@@ -20,7 +20,7 @@ import com.example.weatherapp.ui.theme.WeatherappTheme
  * obviously to be removed later on when proper UI and logic is in place.
  */
 @Composable
-fun WeatherDemo(viewModel: WeatherViewModel = hiltViewModel()) {
+fun WeatherLayout(viewModel: WeatherViewModel = hiltViewModel()) {
 
     val weatherResponse by viewModel.weatherResponse.collectAsStateWithLifecycle()
 
