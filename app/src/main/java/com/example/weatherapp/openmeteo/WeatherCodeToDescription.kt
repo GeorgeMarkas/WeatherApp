@@ -1,6 +1,6 @@
 package com.example.weatherapp.openmeteo
 
-fun weatherCodeToDesc(code: Int): String = when (code) {
+fun weatherCodeToDescription(code: Int): String = when (code) {
     0 -> "Clear sky"
     1 -> "Mainly clear"
     2 -> "Partly cloudy"
