@@ -32,29 +32,53 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 
 @Composable
-fun WeatherLayout(viewModel: WeatherViewModel = hiltViewModel()) {
+fun WeatherLayout(
+    requestBatteryOptimizationExemption: () -> Unit,
+    viewModel: WeatherViewModel = hiltViewModel()
+) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val launcher = rememberLauncherForActivityResult(
+    val bgLocationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        /* TODO: Maybe handle background location permission denial;
+            Without it, the worker will fall back to cached location,
+            which might also be acceptable. */
+    }
+
+    val coarseLocationlauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         viewModel.onPermissionResult(granted)
     }
 
-    LaunchedEffect(Unit) {
-        launcher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-    }
-
     LaunchedEffect(lifecycleOwner) {
+
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            val granted = ContextCompat.checkSelfPermission(
+            val coarseLocationGranted = ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-            viewModel.onPermissionResult(granted)
+
+            if (coarseLocationGranted) {
+                viewModel.onPermissionResult(true)
+
+                val bgLocationGranted = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+                if (!bgLocationGranted) {
+                    bgLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                }
+
+                requestBatteryOptimizationExemption()
+            } else {
+                coarseLocationlauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            }
         }
     }
 
@@ -112,7 +136,10 @@ fun WeatherLayout(viewModel: WeatherViewModel = hiltViewModel()) {
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "Latitude: %.4f • Longitude: %.4f".format(weatherState.latitude, weatherState.longitude),
+                    text = "Latitude: %.4f • Longitude: %.4f".format(
+                        weatherState.latitude,
+                        weatherState.longitude
+                    ),
                     style = MaterialTheme.typography.bodyMedium
                 )
 

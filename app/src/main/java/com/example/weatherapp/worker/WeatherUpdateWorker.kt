@@ -40,7 +40,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
         private const val WORK_NAME = "weather_update"
 
         // TODO: Have the update interval be adjustable by the user, not outright hard coded
-        private const val UPDATE_INTERVAL = 1L
+        private const val UPDATE_INTERVAL = 15L
 
         fun enqueue(context: Context) {
             val constraints = Constraints.Builder()
@@ -49,7 +49,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
 
             val request = PeriodicWorkRequestBuilder<WeatherUpdateWorker>(
                 UPDATE_INTERVAL,
-                TimeUnit.HOURS
+                TimeUnit.MINUTES
             )
                 .setConstraints(constraints)
                 .build()
