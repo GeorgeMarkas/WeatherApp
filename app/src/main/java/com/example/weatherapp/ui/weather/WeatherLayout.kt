@@ -2,6 +2,7 @@ package com.example.weatherapp.ui.weather
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -41,18 +42,18 @@ fun WeatherLayout(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val bgLocationLauncher = rememberLauncherForActivityResult(
+    // This permission is special and needs to be requested separately
+    val backgroundLocationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
-        /* TODO: Maybe handle background location permission denial;
+        /* TODO: Maybe handle background location permission denial?
             Without it, the worker will fall back to cached location,
             which might also be acceptable. */
     }
 
-    val coarseLocationlauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        viewModel.onPermissionResult(granted)
+    val permissionsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) {
     }
 
     LaunchedEffect(lifecycleOwner) {
@@ -66,18 +67,26 @@ fun WeatherLayout(
             if (coarseLocationGranted) {
                 viewModel.onPermissionResult(true)
 
-                val bgLocationGranted = ContextCompat.checkSelfPermission(
+                val backgroundLocationGranted = ContextCompat.checkSelfPermission(
                     context,
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
 
-                if (!bgLocationGranted) {
-                    bgLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                if (!backgroundLocationGranted) {
+                    backgroundLocationLauncher
+                        .launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                 }
 
                 requestBatteryOptimizationExemption()
             } else {
-                coarseLocationlauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                val permissions = buildList {
+                    add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        add(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+
+                permissionsLauncher.launch(permissions.toTypedArray())
             }
         }
     }

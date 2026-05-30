@@ -38,7 +38,7 @@ class WeatherRepository @Inject constructor(
 
             WeatherFetchResult.Success(result, location.latitude, location.longitude)
         } catch (e: Exception) {
-            WeatherFetchResult.Error(e.message ?: "Could not fetch weather updates")
+            WeatherFetchResult.Error(e.message ?: "Unknown error")
         }
     }
 }
