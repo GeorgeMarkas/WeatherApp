@@ -9,6 +9,7 @@ import android.os.StrictMode.VmPolicy
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import com.example.weatherapp.ui.theme.WeatherappTheme
 import com.example.weatherapp.ui.weather.WeatherLayout
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
                 .build()
         )
 
+        enableEdgeToEdge()
         setContent {
             WeatherappTheme {
                 WeatherLayout(

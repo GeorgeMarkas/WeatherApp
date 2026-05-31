@@ -1,6 +1,7 @@
 package com.example.weatherapp.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.catch
 import timber.log.Timber
 import java.io.InputStream
 import java.io.OutputStream
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +26,11 @@ data class CachedWeather(
     val temperatureMin: Double = 0.0,
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
-    val lastUpdatedMs: Long = 0L
+    val lastUpdatedMs: Long = 0L,
+    val hourlyTime: List<String> = emptyList(),
+    val hourlyTemperature: List<Double> = emptyList(),
+    val dailyTime: List<String> = emptyList(),
+    val dailyMaxTemperature: List<Double> = emptyList(),
 )
 
 object CachedWeatherSerializer : Serializer<CachedWeather?> {
@@ -61,7 +68,12 @@ class WeatherDataStore @Inject constructor(
 
     suspend fun save(result: WeatherFetchResult.Success) {
         val current = result.weather.current
+        val hourly = result.weather.hourly
         val daily = result.weather.daily
+
+        val hourlyTime = hourly.time.map { it -> LocalDateTime.parse(it)
+            .format(DateTimeFormatter.ofPattern("HH:mm")) }
+        val
 
         context.weatherDataStore.updateData {
             CachedWeather(
@@ -72,7 +84,11 @@ class WeatherDataStore @Inject constructor(
                 temperatureMin = daily.temperatureMin.firstOrNull() ?: current.temperature,
                 latitude = result.latitude,
                 longitude = result.longitude,
-                lastUpdatedMs = System.currentTimeMillis()
+                lastUpdatedMs = System.currentTimeMillis(),
+                hourlyTime = hourlyTime,
+                hourlyTemperature = hourly.temperature,
+                dailyTime = daily.time,
+                dailyMaxTemperature = daily.temperatureMax
             )
         }
     }

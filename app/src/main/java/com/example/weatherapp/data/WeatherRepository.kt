@@ -19,14 +19,18 @@ sealed class WeatherFetchResult {
     object NoLocation : WeatherFetchResult()
 }
 
+data class Coordinate(val latitude: Double, val longitude: Double)
+
 @Singleton
 class WeatherRepository @Inject constructor(
     private val locationService: LocationService
 ) {
     suspend fun fetchWeather(): WeatherFetchResult {
-        val location = locationService.getLastKnownLocation()
-            ?: locationService.getFreshLocation()
-            ?: return WeatherFetchResult.NoLocation
+//        val location = locationService.getLastKnownLocation()
+//            ?: locationService.getFreshLocation()
+//            ?: return WeatherFetchResult.NoLocation
+
+        val location = Coordinate(37.97, 23.72)
 
         return try {
             val result = withContext(Dispatchers.IO) {
@@ -38,7 +42,7 @@ class WeatherRepository @Inject constructor(
 
             WeatherFetchResult.Success(result, location.latitude, location.longitude)
         } catch (e: Exception) {
-            WeatherFetchResult.Error(e.message ?: "Unknown error")
+            WeatherFetchResult.Error(e.message ?: "Could not fetch weather updates")
         }
     }
 }
