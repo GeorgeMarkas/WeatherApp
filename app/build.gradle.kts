@@ -4,6 +4,7 @@ plugins {
 
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    kotlin("plugin.serialization") version "2.3.21"
 }
 
 android {
@@ -66,6 +67,7 @@ dependencies {
 
     // HTTP
     implementation(libs.retrofit)
-    implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation(libs.kotlinx.serialization.json)
+    runtimeOnly(libs.converter.kotlinx.serialization)
 }
