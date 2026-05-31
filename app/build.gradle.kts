@@ -74,5 +74,5 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
-    runtimeOnly(libs.converter.kotlinx.serialization)
+    implementation(libs.converter.kotlinx.serialization)
 }
