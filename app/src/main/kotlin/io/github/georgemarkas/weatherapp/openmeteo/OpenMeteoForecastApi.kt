@@ -4,7 +4,7 @@ import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResult
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ForecastApi {
+interface OpenMeteoForecastApi {
 
     @GET("v1/forecast?timezone=auto&timeformat=unixtime")
     suspend fun getWeather(
