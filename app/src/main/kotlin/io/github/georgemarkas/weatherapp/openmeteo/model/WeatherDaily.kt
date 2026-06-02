@@ -1,4 +1,4 @@
-package io.github.georgemarkas.weatherapp.openmeteo.models
+package io.github.georgemarkas.weatherapp.openmeteo.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

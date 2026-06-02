@@ -1,6 +1,8 @@
 package io.github.georgemarkas.weatherapp
 
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.VmPolicy
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,21 +20,26 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResult
+import io.github.georgemarkas.weatherapp.data.WeatherResultWrapper
 import io.github.georgemarkas.weatherapp.ui.theme.WeatherAppTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
-import kotlin.toString
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.plant(Timber.DebugTree())
+
+        StrictMode.setVmPolicy(
+            VmPolicy.Builder(StrictMode.getVmPolicy())
+                .detectLeakedClosableObjects()
+                .build()
+        )
+
         enableEdgeToEdge()
         setContent {
             WeatherAppTheme {
@@ -46,15 +53,15 @@ class MainActivity : ComponentActivity() {
 class DemoViewModel @Inject constructor(
     private val repository: WeatherRepository
 ) : ViewModel() {
-    private val _jsonResponse = MutableStateFlow<Result<WeatherResult>?>(null)
-    val jsonResponse: StateFlow<Result<WeatherResult>?> = _jsonResponse.asStateFlow()
+    private val _jsonResponse = MutableStateFlow<Result<WeatherResultWrapper>?>(null)
+    val jsonResponse: StateFlow<Result<WeatherResultWrapper>?> = _jsonResponse.asStateFlow()
 
     init {
         fetchWeather()
     }
 
     fun fetchWeather() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _jsonResponse.value = repository.getWeather()
         }
     }
@@ -64,11 +71,33 @@ class DemoViewModel @Inject constructor(
 fun DemoLayout(viewModel: DemoViewModel = hiltViewModel()) {
     val jsonResponse by viewModel.jsonResponse.collectAsStateWithLifecycle()
 
-    Timber.d(jsonResponse.toString())
+    lateinit var text: String
+    when (val result = jsonResponse) {
+        null -> {
+            text = "Loading..."
+        }
+
+        else -> {
+            result.onSuccess { wrapper ->
+                text = when (wrapper) {
+                    is WeatherResultWrapper.Success -> {
+                        wrapper.result.toString()
+                    }
+
+                    is WeatherResultWrapper.Error -> {
+                        wrapper.message
+                    }
+                }
+            }
+                .onFailure { e ->
+                    text = "An exception occurred: ${e.message}"
+                }
+        }
+    }
 
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        Text(text = jsonResponse.toString())
+        Text(text = text)
     }
 }

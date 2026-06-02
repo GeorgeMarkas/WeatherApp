@@ -1,9 +1,9 @@
 package io.github.georgemarkas.weatherapp.openmeteo
 
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherCurrent
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherDaily
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherHourly
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResult
+import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherCurrent
+import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherDaily
+import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherHourly
+import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherResult
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -15,12 +15,10 @@ import javax.inject.Inject
 class OpenMeteoService @Inject constructor(
     private val client: OkHttpClient,
 ) {
-    private val openMeteoApiUrl = "https://api.open-meteo.com/"
-
     private val json = Json { ignoreUnknownKeys = true }
 
     private val forecastApiImpl: OpenMeteoForecastApi = Retrofit.Builder()
-        .baseUrl(openMeteoApiUrl)
+        .baseUrl(OPEN_METEO_API_URL)
         .client(client)
         .addConverterFactory(
             json.asConverterFactory("application/json".toMediaType())
@@ -48,4 +46,8 @@ class OpenMeteoService @Inject constructor(
         Array(descriptor.elementsCount) { descriptor.getElementName(it) }
             .filter { it != "time" } // This is returned automatically
             .joinToString(",")
+
+    companion object {
+        private const val OPEN_METEO_API_URL = "https://api.open-meteo.com/"
+    }
 }
