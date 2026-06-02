@@ -3,7 +3,7 @@ package io.github.georgemarkas.weatherapp.openmeteo
 import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherCurrent
 import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherDaily
 import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherHourly
-import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherResult
+import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherResponse
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -26,7 +26,7 @@ class OpenMeteoService @Inject constructor(
         .build()
         .create(OpenMeteoForecastApi::class.java)
 
-    suspend fun requestWeather(): WeatherResult {
+    suspend fun requestWeather(): WeatherResponse {
         val current = stringifySerialNames(WeatherCurrent.serializer().descriptor)
         val hourly = stringifySerialNames(WeatherHourly.serializer().descriptor)
         val daily = stringifySerialNames(WeatherDaily.serializer().descriptor)

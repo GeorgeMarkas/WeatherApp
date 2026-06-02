@@ -20,7 +20,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
-import io.github.georgemarkas.weatherapp.data.WeatherResultWrapper
+import io.github.georgemarkas.weatherapp.data.model.WeatherResponseWrapper
 import io.github.georgemarkas.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,8 +53,8 @@ class MainActivity : ComponentActivity() {
 class DemoViewModel @Inject constructor(
     private val repository: WeatherRepository
 ) : ViewModel() {
-    private val _jsonResponse = MutableStateFlow<Result<WeatherResultWrapper>?>(null)
-    val jsonResponse: StateFlow<Result<WeatherResultWrapper>?> = _jsonResponse.asStateFlow()
+    private val _jsonResponse = MutableStateFlow<Result<WeatherResponseWrapper>?>(null)
+    val jsonResponse: StateFlow<Result<WeatherResponseWrapper>?> = _jsonResponse.asStateFlow()
 
     init {
         fetchWeather()
@@ -80,12 +80,12 @@ fun DemoLayout(viewModel: DemoViewModel = hiltViewModel()) {
         else -> {
             result.onSuccess { wrapper ->
                 text = when (wrapper) {
-                    is WeatherResultWrapper.Success -> {
+                    is WeatherResponseWrapper.Success -> {
                         wrapper.result.toString()
                     }
 
-                    is WeatherResultWrapper.Error -> {
-                        wrapper.message
+                    is WeatherResponseWrapper.Error -> {
+                        wrapper.reason
                     }
                 }
             }

@@ -1,6 +1,6 @@
 package io.github.georgemarkas.weatherapp.openmeteo
 
-import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherResult
+import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -14,5 +14,5 @@ interface OpenMeteoForecastApi {
         @Query("hourly") hourly: String,
         @Query("daily") daily: String,
         @Query("forecast_days") forecastDays: Int,
-    ): WeatherResult
+    ): WeatherResponse
 }

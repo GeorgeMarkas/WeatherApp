@@ -1,14 +1,9 @@
 package io.github.georgemarkas.weatherapp.data
 
+import io.github.georgemarkas.weatherapp.data.model.WeatherResponseWrapper
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
-import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherResult
 import timber.log.Timber
 import javax.inject.Inject
-
-sealed class WeatherResultWrapper {
-    data class Success(val result: WeatherResult) : WeatherResultWrapper()
-    data class Error(val message: String) : WeatherResultWrapper()
-}
 
 class WeatherRepository @Inject constructor(
     private val service: OpenMeteoService
@@ -16,16 +11,17 @@ class WeatherRepository @Inject constructor(
 
     // TODO: Implement retry/refresh + caching logic
 
-    suspend fun getWeather(): Result<WeatherResultWrapper> {
+    suspend fun getWeather(): Result<WeatherResponseWrapper> {
         val response = service.requestWeather()
+
         return runCatching {
             if (response.error != true) {
-                WeatherResultWrapper.Success(response)
+                WeatherResponseWrapper.Success(response)
             } else {
                 // Getting an error with no reason being provided shouldn't happen in
-                // practice, but OpenMeteo's API doesn't explicitely state that, so we
+                // practice, but OpenMeteo's API docs don't explicitely state that, so we
                 // handle it just in case.
-                WeatherResultWrapper.Error(
+                WeatherResponseWrapper.Error(
                     response.reason ?: "Unknown error; OpenMeteo provided no reason"
                 )
             }
