@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">Weather</string>
+
+    <!-- Weather code descriptions (WMO 4677) -->
+    <string name="openmeteo_clear_sky">Clear sky</string>
+    <string name="openmeteo_mainly_clear">Mostly clear</string>
+    <string name="openmeteo_partly_cloudy">Partly cloudy</string>
+    <string name="openmeteo_overcast">Overcast</string>
+    <string name="openmeteo_fog">Fog</string>
+    <string name="openmeteo_depositing_rime_fog">Depositing rime fog</string>
+    <string name="openmeteo_drizzle_light_intensity">Light drizzle</string>
+    <string name="openmeteo_drizzle_moderate_intensity">Moderate drizzle</string>
+    <string name="openmeteo_drizzle_dense_intensity">Heavy drizzle</string>
+    <string name="openmeteo_freezing_drizzle_light_intensity">Light freezing drizzle</string>
+    <string name="openmeteo_freezing_drizzle_dense_intensity">Heavy freezing drizzle</string>
+    <string name="openmeteo_rain_slight_intensity">Light rain</string>
+    <string name="openmeteo_rain_moderate_intensity">Moderate rain</string>
+    <string name="openmeteo_rain_heavy_intensity">Heavy rain</string>
+    <string name="openmeteo_freezing_rain_light_intensity">Light freezing rain</string>
+    <string name="openmeteo_freezing_rain_heavy_intensity">Heavy freezing rain</string>
+    <string name="openmeteo_snow_slight_intensity">Light snow</string>
+    <string name="openmeteo_snow_moderate_intensity">Moderate snow</string>
+    <string name="openmeteo_snow_heavy_intensity">Heavy snow</string>
+    <string name="openmeteo_snow_grains">Snow grains</string>
+    <string name="openmeteo_rain_showers_slight">Light rain showers</string>
+    <string name="openmeteo_rain_showers_moderate">Moderate rain showers</string>
+    <string name="openmeteo_rain_showers_violent">Heavy rain showers</string>
+    <string name="openmeteo_snow_showers_slight">Light snow showers</string>
+    <string name="openmeteo_snow_showers_heavy">Heavy snow showers</string>
+    <string name="openmeteo_thunderstorm_slight_or_moderate">Thunderstorm slight or moderate</string>
+    <string name="openmeteo_thunderstorm_with_slight_hail">Thunderstorm with slight hail</string>
+    <string name="openmeteo_thunderstorm_with_heavy_hail">Thunderstorm with heavy hail</string>
 </resources>
