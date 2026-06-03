@@ -1,9 +1,9 @@
 package io.github.georgemarkas.weatherapp.openmeteo
 
-import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherCurrent
-import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherDaily
-import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherHourly
-import io.github.georgemarkas.weatherapp.openmeteo.model.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherCurrent
+import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherDaily
+import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherHourly
+import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
