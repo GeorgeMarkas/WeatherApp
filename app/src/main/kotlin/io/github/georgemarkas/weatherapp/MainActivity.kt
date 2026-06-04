@@ -27,9 +27,9 @@ import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
 import io.github.georgemarkas.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    JsonDemoLayout(modifier = Modifier.padding((innerPadding)))
+                    DemoLayout(modifier = Modifier.padding((innerPadding)))
                 }
             }
         }
@@ -58,50 +58,46 @@ class MainActivity : ComponentActivity() {
 }
 
 @HiltViewModel
-class JsonDemoViewModel @Inject constructor(
+class DemoViewModel @Inject constructor(
     private val repository: WeatherRepository
 ) : ViewModel() {
-    private val _jsonResponse = MutableStateFlow<Result<WeatherResponse>?>(null)
-    val jsonResponse: StateFlow<Result<WeatherResponse>?> = _jsonResponse.asStateFlow()
+
+    val weather: StateFlow<WeatherResponse?> = repository.weatherFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
 
     init {
-        fetchWeather()
-    }
-
-    fun fetchWeather() {
         viewModelScope.launch(Dispatchers.IO) {
-            _jsonResponse.value = repository.getWeather()
+            repository.updateWeather()
         }
     }
 }
 
 @Composable
-fun JsonDemoLayout(
+fun DemoLayout(
     modifier: Modifier = Modifier,
-    viewModel: JsonDemoViewModel = hiltViewModel()
+    viewModel: DemoViewModel = hiltViewModel()
 ) {
-    val jsonResponse by viewModel.jsonResponse.collectAsStateWithLifecycle()
+    val weather by viewModel.weather.collectAsStateWithLifecycle()
     val format = remember { Json { prettyPrint = true } }
 
-    lateinit var text: String
-    when (val result = jsonResponse) {
+    val text: String = when (val result = weather) {
+
         null -> {
-            text = "Loading..."
+            "Loading..."
         }
 
         else -> {
-            result.onSuccess { response ->
-                text = if (response.error == true) {
-                    val reason = response.reason ?: "Unknown error; OpenMeteo provided no reason"
-                    Timber.d("Response contained error: ${response.reason}")
-                    reason
-                } else {
-                    format.encodeToString(response)
-                }
+            if (result.error == true) {
+                val reason = result.reason ?: "Unknown error; OpenMeteo provided no reason"
+                Timber.d("Response contained error: ${result.reason}")
+                reason
+            } else {
+                format.encodeToString(result)
             }
-                .onFailure { e ->
-                    text = "An exception occurred: ${e.message}"
-                }
         }
     }
 

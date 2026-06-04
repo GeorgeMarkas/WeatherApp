@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import javax.inject.Inject
@@ -14,7 +15,7 @@ import kotlin.coroutines.resume
 
 @SuppressLint("MissingPermission")
 class LocationService @Inject constructor(
-    private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val locationClient: FusedLocationProviderClient
 ) {
 
