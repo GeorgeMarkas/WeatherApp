@@ -73,7 +73,7 @@ dependencies {
     // Logging
     implementation(libs.timber)
 
-    // Hilt
+    // DI
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
