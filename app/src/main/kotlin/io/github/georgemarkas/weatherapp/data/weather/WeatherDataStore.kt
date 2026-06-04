@@ -1,4 +1,4 @@
-package io.github.georgemarkas.weatherapp.data
+package io.github.georgemarkas.weatherapp.data.weather
 
 import android.content.Context
 import androidx.datastore.core.CorruptionException
@@ -8,8 +8,6 @@ import androidx.datastore.dataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -17,7 +15,6 @@ import timber.log.Timber
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
-import javax.inject.Singleton
 
 object WeatherResponseSerializer : Serializer<WeatherResponse?> {
 
@@ -42,23 +39,18 @@ object WeatherResponseSerializer : Serializer<WeatherResponse?> {
     }
 }
 
-private val Context.weatherDataStore: DataStore<WeatherResponse?> by dataStore(
+val Context.weatherDataStore: DataStore<WeatherResponse?> by dataStore(
     fileName = "cached_weather_response.json",
     serializer = WeatherResponseSerializer
 )
 
-@Singleton
 class WeatherDataStore @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
-    val cachedWeatherResponse: Flow<WeatherResponse?> = context.weatherDataStore.data
-        .catch { e ->
-            Timber.d(e, "Failed to expose flow from DataStore")
-            emit(null)
-        }
 
-    suspend fun save(response: WeatherResponse) {
+    suspend fun cacheWeather(response: WeatherResponse) {
         context.weatherDataStore.updateData { response }
         Timber.i("Cached WeatherResponse")
     }
+
 }

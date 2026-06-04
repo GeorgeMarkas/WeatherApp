@@ -23,12 +23,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.georgemarkas.weatherapp.data.WeatherRepository
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
+import io.github.georgemarkas.weatherapp.data.location.LocationRepository
+import io.github.georgemarkas.weatherapp.data.weather.WeatherRepository
 import io.github.georgemarkas.weatherapp.ui.theme.WeatherAppTheme
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -59,19 +58,22 @@ class MainActivity : ComponentActivity() {
 
 @HiltViewModel
 class DemoViewModel @Inject constructor(
-    private val repository: WeatherRepository
+    private val weatherRepository: WeatherRepository,
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
 
-    val weather: StateFlow<WeatherResponse?> = repository.weatherFlow
+    val weather = weatherRepository.weatherFlow
         .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            null
         )
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.updateWeather()
+        viewModelScope.launch {
+            locationRepository.updateLocation()
+            val location = locationRepository.locationFlow.first()
+            weatherRepository.updateWeather(location)
         }
     }
 }

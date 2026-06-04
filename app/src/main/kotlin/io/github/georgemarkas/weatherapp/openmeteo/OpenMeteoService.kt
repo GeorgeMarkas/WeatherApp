@@ -2,6 +2,7 @@ package io.github.georgemarkas.weatherapp.openmeteo
 
 import android.content.Context
 import io.github.georgemarkas.weatherapp.R
+import io.github.georgemarkas.weatherapp.location.LocationWrapper
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherCurrent
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherDaily
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherHourly
@@ -10,8 +11,10 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import timber.log.Timber
 import javax.inject.Inject
 
 class OpenMeteoService @Inject constructor(
@@ -28,27 +31,31 @@ class OpenMeteoService @Inject constructor(
         .build()
         .create(OpenMeteoForecastApi::class.java)
 
-    suspend fun requestWeather(): WeatherResponse {
+    suspend fun requestWeather(location: LocationWrapper): WeatherResponse? {
         val current = stringifySerialNames(WeatherCurrent.serializer().descriptor)
         val hourly = stringifySerialNames(WeatherHourly.serializer().descriptor)
         val daily = stringifySerialNames(WeatherDaily.serializer().descriptor)
 
-        return forecastApiImpl.getWeather(
-            // TODO: Dummy values, swap out with location service ones
-            37.9838,
-            23.7275,
-            current,
-            hourly,
-            daily,
-            7 // TODO: Have this be an adjustable setting
-        )
+        return try {
+            forecastApiImpl.getWeather(
+                location.latitude,
+                location.longitude,
+                current,
+                hourly,
+                daily,
+                7 // TODO: Have this be an adjustable setting
+            )
+        } catch (e: HttpException) {
+            Timber.w(e, "Failed to fetch weather update")
+            null
+        }
     }
 
     fun getWeatherCodeDescription(
         context: Context,
         code: Int?
     ): String? {
-        return when(code) {
+        return when (code) {
             null -> null
             0 -> context.getString(R.string.openmeteo_clear_sky)
             1 -> context.getString(R.string.openmeteo_mainly_clear)
