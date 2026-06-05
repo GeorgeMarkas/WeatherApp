@@ -23,8 +23,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.georgemarkas.weatherapp.data.location.LocationRepository
-import io.github.georgemarkas.weatherapp.data.weather.WeatherRepository
+import io.github.georgemarkas.weatherapp.data.LocationDataStore
+import io.github.georgemarkas.weatherapp.data.WeatherDataStore
 import io.github.georgemarkas.weatherapp.ui.theme.WeatherAppTheme
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -58,11 +58,11 @@ class MainActivity : ComponentActivity() {
 
 @HiltViewModel
 class DemoViewModel @Inject constructor(
-    private val weatherRepository: WeatherRepository,
-    private val locationRepository: LocationRepository
+    private val locationDataStore: LocationDataStore,
+    private val weatherDataStore: WeatherDataStore
 ) : ViewModel() {
 
-    val weather = weatherRepository.weatherFlow
+    val weather = weatherDataStore.weatherFlow
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -71,9 +71,9 @@ class DemoViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            locationRepository.updateLocation()
-            val location = locationRepository.locationFlow.first()
-            weatherRepository.updateWeather(location)
+            locationDataStore.updateLocation()
+            val location = locationDataStore.locationFlow.first()
+            weatherDataStore.updateWeather(location)
         }
     }
 }

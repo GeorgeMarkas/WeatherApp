@@ -1,4 +1,4 @@
-package io.github.georgemarkas.weatherapp.data.weather
+package io.github.georgemarkas.weatherapp.data
 
 import android.content.Context
 import androidx.datastore.core.CorruptionException
@@ -6,8 +6,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.georgemarkas.weatherapp.location.LocationWrapper
+import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -15,6 +18,11 @@ import timber.log.Timber
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
+
+val Context.weatherDataStore: DataStore<WeatherResponse?> by dataStore(
+    fileName = "weather.json",
+    serializer = WeatherResponseSerializer
+)
 
 object WeatherResponseSerializer : Serializer<WeatherResponse?> {
 
@@ -39,18 +47,30 @@ object WeatherResponseSerializer : Serializer<WeatherResponse?> {
     }
 }
 
-val Context.weatherDataStore: DataStore<WeatherResponse?> by dataStore(
-    fileName = "cached_weather_response.json",
-    serializer = WeatherResponseSerializer
-)
-
 class WeatherDataStore @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val service: OpenMeteoService
 ) {
+    val weatherFlow: Flow<WeatherResponse?> = context.weatherDataStore.data
 
-    suspend fun cacheWeather(response: WeatherResponse) {
-        context.weatherDataStore.updateData { response }
-        Timber.i("Cached WeatherResponse")
+    suspend fun updateWeather(location: LocationWrapper?) {
+        if (location == null) throw IllegalArgumentException("Location can not be null")
+        val weather = service.requestWeather(location)
+
+        if (weather != null) {
+            if (weather.error == null) {
+                storeWeather(weather)
+                Timber.i("Updated weather")
+            } else {
+                Timber.w(weather.reason ?: "Unknown error; OpenMeteo provided no reason")
+            }
+        } else {
+            Timber.w("Failed to update weather")
+        }
     }
 
+    private suspend fun storeWeather(weather: WeatherResponse) {
+        context.weatherDataStore.updateData { weather }
+        Timber.d("Stored weather in DataStore")
+    }
 }
