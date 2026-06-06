@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 val Context.locationDataStore by preferencesDataStore(name = "location")
 
-class LocationDataStore @Inject constructor(
+class LocationRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val service: LocationService
 ) {

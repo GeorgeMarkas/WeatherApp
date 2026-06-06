@@ -61,7 +61,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -76,12 +75,20 @@ dependencies {
     // DI
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.common)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+
+    // Location
+    implementation(libs.play.services.location)
 
     // DataStore
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.datastore.preferences)
+
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
 
     // HTTP
     implementation(libs.retrofit)

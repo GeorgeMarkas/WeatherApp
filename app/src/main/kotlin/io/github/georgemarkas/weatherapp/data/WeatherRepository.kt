@@ -47,7 +47,7 @@ object WeatherResponseSerializer : Serializer<WeatherResponse?> {
     }
 }
 
-class WeatherDataStore @Inject constructor(
+class WeatherRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val service: OpenMeteoService
 ) {
