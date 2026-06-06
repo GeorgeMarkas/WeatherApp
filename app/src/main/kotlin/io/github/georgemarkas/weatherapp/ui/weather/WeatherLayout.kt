@@ -31,7 +31,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.georgemarkas.weatherapp.background.WeatherUpdateWorker
 import io.github.georgemarkas.weatherapp.extensions.hasPermission
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -62,9 +61,7 @@ fun WeatherLayout(
     }
 
     LaunchedEffect(locationGranted) {
-        // TODO: Only run this on first launch
-        if (locationGranted) {
-            Timber.d("Entered locationGranted clause")
+        if (locationGranted && !WeatherUpdateWorker.isScheduled(context)) {
             WeatherUpdateWorker.scheduleJob(context)
             WeatherUpdateWorker.start(context)
         }

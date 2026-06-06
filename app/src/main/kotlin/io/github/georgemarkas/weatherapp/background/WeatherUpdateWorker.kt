@@ -13,13 +13,14 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
+import io.github.georgemarkas.weatherapp.extensions.isRunning
+import io.github.georgemarkas.weatherapp.extensions.workManager
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -35,7 +36,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         if (!isOnline(context)) {
-            Timber.d("No connection, retrying...")
+            Timber.i("No connection, retrying")
             return Result.retry()
         }
 
@@ -47,7 +48,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
             weatherRepository.updateWeather(location)
             Result.success()
         } catch (e: Exception) {
-            Timber.w(e, "Weather update failed")
+            Timber.w(e, "Weather update failed, retrying")
             Result.retry()
         }
     }
@@ -59,8 +60,6 @@ class WeatherUpdateWorker @AssistedInject constructor(
         private const val BACKOFF_DELAY: Long = 10
 
         fun scheduleJob(context: Context) {
-            Timber.d("scheduleJob called")
-
             val updateInterval = 15.minutes // TODO: Have this be a setting
             val constraints = Constraints(
                 requiredNetworkType = NetworkType.CONNECTED
@@ -78,7 +77,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
                 .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.MINUTES)
                 .build()
 
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            context.workManager.enqueueUniquePeriodicWork(
                 WORK_NAME_PERIODIC,
                 ExistingPeriodicWorkPolicy.UPDATE,
                 request
@@ -86,8 +85,8 @@ class WeatherUpdateWorker @AssistedInject constructor(
         }
 
         fun start(context: Context): Boolean {
-            val workManager = WorkManager.getInstance(context)
-            if (isRunning(workManager, TAG)) return false
+            val workManager = context.workManager
+            if (workManager.isRunning(TAG)) return false
 
             val request = OneTimeWorkRequestBuilder<WeatherUpdateWorker>()
                 .addTag(TAG)
@@ -104,7 +103,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
         }
 
         fun stop(context: Context) {
-            val workManager = WorkManager.getInstance(context)
+            val workManager = context.workManager
             val workQuery = WorkQuery.Builder.fromTags(listOf(TAG))
                 .addStates(listOf(WorkInfo.State.RUNNING))
                 .build()
@@ -116,9 +115,14 @@ class WeatherUpdateWorker @AssistedInject constructor(
                 }
         }
 
-        private fun isRunning(workManager: WorkManager, tag: String): Boolean {
-            val list = workManager.getWorkInfosByTag(tag).get()
-            return list.any { it.state == WorkInfo.State.RUNNING }
+        fun isScheduled(context: Context): Boolean {
+            val infos = context.workManager
+                .getWorkInfosForUniqueWork(WORK_NAME_PERIODIC)
+                .get()
+
+            return infos.any {
+                it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING
+            }
         }
     }
 

@@ -9,8 +9,8 @@ import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -23,18 +23,13 @@ class WeatherViewModel @Inject constructor(
     private val service: OpenMeteoService
 ) : ViewModel() {
 
-    val uiState: StateFlow<WeatherUiState> =
-        combine(
-            locationRepository.locationFlow,
-            weatherRepository.weatherFlow
-        ) { location, weather ->
-            WeatherUiState(location, weather)
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = WeatherUiState(isLoading = true)
-            )
+    val uiState: StateFlow<WeatherUiState> = weatherRepository.weatherFlow
+        .map { weather -> WeatherUiState(weather) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = WeatherUiState(isLoading = true)
+        )
 
     fun refresh() {
         viewModelScope.launch {
