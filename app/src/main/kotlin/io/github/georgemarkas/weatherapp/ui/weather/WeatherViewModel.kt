@@ -1,16 +1,19 @@
 package io.github.georgemarkas.weatherapp.ui.weather
 
 import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
+import io.github.georgemarkas.weatherapp.extensions.isOnline
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -23,22 +26,35 @@ class WeatherViewModel @Inject constructor(
     private val service: OpenMeteoService
 ) : ViewModel() {
 
-    val uiState: StateFlow<WeatherUiState> = weatherRepository.weatherFlow
-        .map { weather -> WeatherUiState(weather) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = WeatherUiState(isLoading = true)
-        )
+    private val isRefreshing = MutableStateFlow(false)
+    val uiState: StateFlow<WeatherUiState> =
+        combine(
+            weatherRepository.weatherFlow,
+            isRefreshing
+        ) { weather, isRefreshing ->
+            WeatherUiState(weather = weather, isRefreshing = isRefreshing)
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = WeatherUiState(isLoading = true)
+            )
 
-    fun refresh() {
+    fun refresh(context: Context) {
         viewModelScope.launch {
+            isRefreshing.value = true
             try {
-                locationRepository.updateLocation()
-                val location = locationRepository.locationFlow.first()
-                weatherRepository.updateWeather(location)
+                if (context.isOnline()) {
+                    locationRepository.updateLocation()
+                    val location = locationRepository.locationFlow.first()
+                    weatherRepository.updateWeather(location)
+                } else {
+                    Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()
+                }
             } catch (e: Exception) {
-                Timber.w(e, "Refresh failed")
+                Timber.w(e, "Failed to refresh")
+            } finally {
+                isRefreshing.value = false
             }
         }
     }

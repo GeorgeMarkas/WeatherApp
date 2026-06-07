@@ -1,8 +1,6 @@
 package io.github.georgemarkas.weatherapp.background
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -19,9 +17,13 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
+import io.github.georgemarkas.weatherapp.extensions.isOnline
 import io.github.georgemarkas.weatherapp.extensions.isRunning
+import io.github.georgemarkas.weatherapp.extensions.setInForegroundContext
 import io.github.georgemarkas.weatherapp.extensions.workManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.minutes
@@ -35,21 +37,23 @@ class WeatherUpdateWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        if (!isOnline(context)) {
+        if (!context.isOnline()) {
             Timber.i("No connection, retrying")
             return Result.retry()
         }
 
-        // TODO: Might need to have the worker run in the context of a foreground service
+        setInForegroundContext()
 
-        return try {
-            locationRepository.updateLocation()
-            val location = locationRepository.locationFlow.first()
-            weatherRepository.updateWeather(location)
-            Result.success()
-        } catch (e: Exception) {
-            Timber.w(e, "Weather update failed, retrying")
-            Result.retry()
+        return withContext(Dispatchers.IO) {
+            try {
+                locationRepository.updateLocation()
+                val location = locationRepository.locationFlow.first()
+                weatherRepository.updateWeather(location)
+                Result.success()
+            } catch (e: Exception) {
+                Timber.w(e, "Weather update failed, retrying")
+                Result.retry()
+            }
         }
     }
 
@@ -123,20 +127,6 @@ class WeatherUpdateWorker @AssistedInject constructor(
             return infos.any {
                 it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING
             }
-        }
-    }
-
-    private fun isOnline(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val network = connectivityManager.activeNetwork ?: return false
-        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-
-        return when {
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            else -> false
         }
     }
 }

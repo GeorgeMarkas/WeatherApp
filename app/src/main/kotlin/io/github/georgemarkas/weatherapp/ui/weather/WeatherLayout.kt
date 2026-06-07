@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -91,85 +93,71 @@ fun WeatherLayout(
         }
     }
 
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    PullToRefreshBox(
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = { viewModel.refresh(context) },
+        modifier = modifier.fillMaxSize()
     ) {
-        when {
-            uiState.isLoading -> {
-                CircularProgressIndicator()
-                Spacer(Modifier.height(8.dp))
-                Text("Fetching weather...")
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            when {
+                uiState.isLoading -> {
+                    LinearProgressIndicator()
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Fetching weather...",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                uiState.weather != null -> {
+                    Text(
+                        text = "${uiState.weather!!.current?.temperature}°C",
+                        style = MaterialTheme.typography.displayLarge,
+                    )
+
+                    Text(
+                        text = "${
+                            viewModel.getWeatherText(
+                                context,
+                                uiState.weather!!.current?.weatherCode
+                            )
+                        }",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    val temperatureMin = uiState.weather!!.daily?.temperatureMin?.get(0)
+                    val temperatureMax = uiState.weather!!.daily?.temperatureMax?.get(0)
+                    Text(
+                        text = "Low $temperatureMin°C • High $temperatureMax°C",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    val lastUpdatedAt =
+                        SimpleDateFormat("HH:mm:ss", LocalLocale.current.platformLocale)
+                            .format(Date(uiState.weather!!.fetchedAt))
+                    Text(
+                        text = "Last updated at $lastUpdatedAt",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                else -> {
+                    Text(
+                        text = "Something went wrong",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                // TODO: Handle erroneous states / lack of permissions somehow
             }
-
-            uiState.weather != null -> {
-                Text(
-                    text = "${uiState.weather!!.current?.temperature}°C",
-                    style = MaterialTheme.typography.displayLarge,
-                )
-
-                Text(
-                    text = "${
-                        viewModel.getWeatherText(
-                            context,
-                            uiState.weather!!.current?.weatherCode
-                        )
-                    }",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Spacer(Modifier.height(8.dp))
-
-                val temperatureMin = uiState.weather!!.daily?.temperatureMin?.get(0)
-                val temperatureMax = uiState.weather!!.daily?.temperatureMax?.get(0)
-                Text(
-                    text = "Low $temperatureMin°C • High $temperatureMax°C",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(Modifier.height(8.dp))
-
-                val lastUpdatedAt = SimpleDateFormat("HH:mm", LocalLocale.current.platformLocale)
-                    .format(Date(uiState.weather!!.fetchedAt))
-                Text(
-                    text = "Last updated at $lastUpdatedAt",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            // TODO: Handle erroneous states / lack of permissions somehow
         }
-    }
-}
-
-@Preview
-@Composable
-fun WeatherLayoutPreview() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "21.8°C",
-            style = MaterialTheme.typography.displayLarge,
-        )
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = "Partly cloudy",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = "Low 17.8°C • High 22.4°C",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = "Last updated at 01:53",
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }
