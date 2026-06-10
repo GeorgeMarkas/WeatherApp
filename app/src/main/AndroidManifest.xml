@@ -14,6 +14,8 @@
         tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:name=".WeatherApp"
         android:allowBackup="true"

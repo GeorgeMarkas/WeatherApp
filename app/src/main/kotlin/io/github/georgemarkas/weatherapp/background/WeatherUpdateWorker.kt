@@ -19,7 +19,7 @@ import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
 import io.github.georgemarkas.weatherapp.extensions.isRunning
-import io.github.georgemarkas.weatherapp.extensions.setInForegroundContext
+import io.github.georgemarkas.weatherapp.extensions.setForegroundSafely
 import io.github.georgemarkas.weatherapp.extensions.workManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -42,7 +42,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
             return Result.retry()
         }
 
-        setInForegroundContext()
+        setForegroundSafely()
 
         return withContext(Dispatchers.IO) {
             try {

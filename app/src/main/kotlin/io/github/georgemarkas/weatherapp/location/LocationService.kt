@@ -24,7 +24,7 @@ class LocationService @Inject constructor(
 
             if (!hasLocationPermission()) {
                 continuation.resume(null)
-                Timber.d("Location permissions missing")
+                Timber.d("Location permission not granted")
                 return@suspendCancellableCoroutine
             }
 
@@ -45,7 +45,7 @@ class LocationService @Inject constructor(
             if (!hasLocationPermission()) {
                 cancellationTokenSource.cancel()
                 continuation.resume(null)
-                Timber.d("Location permissions missing")
+                Timber.d("Location permission not granted")
                 return@suspendCancellableCoroutine
             }
 

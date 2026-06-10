@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Weather</string>
 
+    <!-- Notifications -->
+    <string name="notification_channel_alerts">Extreme weather alerts</string>
+
     <!-- Weather code descriptions (WMO 4677) -->
     <string name="openmeteo_clear_sky">Clear sky</string>
     <string name="openmeteo_mainly_clear">Mostly clear</string>

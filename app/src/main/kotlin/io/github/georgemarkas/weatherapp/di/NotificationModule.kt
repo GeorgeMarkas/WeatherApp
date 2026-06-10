@@ -1,8 +1,7 @@
 package io.github.georgemarkas.weatherapp.di
 
+import android.app.NotificationManager
 import android.content.Context
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,11 +11,10 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object LocationModule {
+object NotificationModule {
 
     @Provides
     @Singleton
-    fun provideLocationClient(
-        @ApplicationContext context: Context
-    ): FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+    fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 }

@@ -18,7 +18,7 @@ fun WorkManager.isRunning(tag: String): Boolean {
     }
 }
 
-suspend fun CoroutineWorker.setInForegroundContext() {
+suspend fun CoroutineWorker.setForegroundSafely() {
     try {
         setForeground(getForegroundInfo())
         delay(500)
