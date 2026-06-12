@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.georgemarkas.weatherapp.exceptions.WeatherException
 import io.github.georgemarkas.weatherapp.location.LocationWrapper
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
@@ -54,18 +55,19 @@ class WeatherRepository @Inject constructor(
     val weatherFlow: Flow<WeatherResponse?> = context.weatherDataStore.data
 
     suspend fun updateWeather(location: LocationWrapper?) {
-        if (location == null) throw IllegalArgumentException("Location can not be null")
+        if (location == null) throw WeatherException("Provided location is null")
         val weather = service.requestWeather(location)
 
-        if (weather != null) {
-            if (weather.error == null) {
-                storeWeather(weather)
+        weather.onSuccess { response ->
+            if (response.error == null) {
+                storeWeather(response)
                 Timber.i("Updated weather")
             } else {
-                Timber.w(weather.reason ?: "Unknown error; OpenMeteo provided no reason")
+                val reason = response.reason ?: "Unknown error; OpenMeteo provided no reason"
+                throw WeatherException("OpenMeteo's response contains an error: $reason")
             }
-        } else {
-            Timber.w("Failed to update weather")
+        }.onFailure { e ->
+               throw WeatherException("Failed to update weather", e)
         }
     }
 

@@ -11,10 +11,8 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import timber.log.Timber
 import javax.inject.Inject
 
 class OpenMeteoService @Inject constructor(
@@ -31,12 +29,12 @@ class OpenMeteoService @Inject constructor(
         .build()
         .create(OpenMeteoForecastApi::class.java)
 
-    suspend fun requestWeather(location: LocationWrapper): WeatherResponse? {
+    suspend fun requestWeather(location: LocationWrapper): Result<WeatherResponse> {
         val current = stringifySerialNames(WeatherCurrent.serializer().descriptor)
         val hourly = stringifySerialNames(WeatherHourly.serializer().descriptor)
         val daily = stringifySerialNames(WeatherDaily.serializer().descriptor)
 
-        return try {
+        return runCatching {
             forecastApiImpl.getWeather(
                 location.latitude,
                 location.longitude,
@@ -45,9 +43,6 @@ class OpenMeteoService @Inject constructor(
                 daily,
                 7
             )
-        } catch (e: HttpException) {
-            Timber.w(e, "Failed to fetch weather update")
-            null
         }
     }
 

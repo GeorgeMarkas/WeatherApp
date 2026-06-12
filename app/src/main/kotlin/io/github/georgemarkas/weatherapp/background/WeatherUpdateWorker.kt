@@ -38,7 +38,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         if (!context.isOnline()) {
-            Timber.i("No connection, retrying")
+            Timber.w("No connection, retrying")
             return Result.retry()
         }
 

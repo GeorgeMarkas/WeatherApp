@@ -53,6 +53,7 @@ class WeatherViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Timber.w(e, "Failed to refresh")
+                Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
             } finally {
                 isRefreshing.value = false
             }
