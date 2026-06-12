@@ -59,7 +59,4 @@ class WeatherViewModel @Inject constructor(
             }
         }
     }
-
-    fun getWeatherText(context: Context, code: Int?): String? =
-        service.getWeatherCodeDescription(context, code)
 }

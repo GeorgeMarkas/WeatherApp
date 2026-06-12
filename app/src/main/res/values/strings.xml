@@ -5,7 +5,9 @@
     <string name="notification_channel_group">Weather</string>
 
     <string name="notification_channel_alert">Alerts</string>
+    <string name="notification_channel_background">Background services</string>
     <string name="notification_channel_forecast">Forecasts</string>
+
 
     <!-- Weather code descriptions (WMO 4677) -->
     <string name="openmeteo_clear_sky">Clear sky</string>

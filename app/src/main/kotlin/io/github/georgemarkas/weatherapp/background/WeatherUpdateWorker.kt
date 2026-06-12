@@ -1,12 +1,14 @@
 package io.github.georgemarkas.weatherapp.background
 
 import android.content.Context
+import android.content.pm.ServiceInfo
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
@@ -21,6 +23,7 @@ import io.github.georgemarkas.weatherapp.extensions.isOnline
 import io.github.georgemarkas.weatherapp.extensions.isRunning
 import io.github.georgemarkas.weatherapp.extensions.setForegroundSafely
 import io.github.georgemarkas.weatherapp.extensions.workManager
+import io.github.georgemarkas.weatherapp.notification.Notifications
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -34,9 +37,13 @@ class WeatherUpdateWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
+    private val notifier: WeatherUpdateNotifier
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        if (tags.contains(WORK_NAME_PERIODIC) && context.workManager.isRunning(WORK_NAME_ONE_SHOT))
+            return Result.retry()
+
         if (!context.isOnline()) {
             Timber.w("No connection, retrying")
             return Result.retry()
@@ -48,7 +55,13 @@ class WeatherUpdateWorker @AssistedInject constructor(
             try {
                 locationRepository.updateLocation()
                 val location = locationRepository.locationFlow.first()
+
                 weatherRepository.updateWeather(location)
+
+                // TODO: Temporary for testing, make it not shit
+                val weather = weatherRepository.weatherFlow.first()
+                Notifications.sendForecastNotification(context, weather!!)
+
                 Result.success()
             } catch (e: Exception) {
                 Timber.w(e, "Weather update failed, retrying")
@@ -56,6 +69,13 @@ class WeatherUpdateWorker @AssistedInject constructor(
             }
         }
     }
+
+    override suspend fun getForegroundInfo(): ForegroundInfo =
+        ForegroundInfo(
+            Notifications.ID_BACKGROUND,
+            notifier.progressNotificationBuilder.build(),
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        )
 
     companion object {
         private const val TAG = "weather_update"

@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.georgemarkas.weatherapp.background.WeatherUpdateWorker
 import io.github.georgemarkas.weatherapp.extensions.hasPermission
+import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -65,6 +66,7 @@ fun WeatherLayout(
             Manifest.permission.POST_NOTIFICATIONS
     }
 
+    // TODO: This is most likely crap and needs to be redone
     LaunchedEffect(coarseLocationGranted) {
         if (coarseLocationGranted && !WeatherUpdateWorker.isScheduled(context)) {
             WeatherUpdateWorker.scheduleJob(context)
@@ -126,7 +128,7 @@ fun WeatherLayout(
 
                     Text(
                         text = "${
-                            viewModel.getWeatherText(
+                            OpenMeteoService.getWeatherCodeDescription(
                                 context,
                                 uiState.weather!!.current?.weatherCode
                             )

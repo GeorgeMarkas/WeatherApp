@@ -21,9 +21,9 @@ fun WorkManager.isRunning(tag: String): Boolean {
 suspend fun CoroutineWorker.setForegroundSafely() {
     try {
         setForeground(getForegroundInfo())
-        delay(600)
-        Timber.d("Set foreground job")
-    } catch(_: IllegalStateException) {
-        Timber.d("Not allowed to set foreground job")
+        delay(500)
+        Timber.d("Successfully set foreground job")
+    } catch(e: IllegalStateException) {
+        Timber.d(e, "Not allowed to set foreground job")
     }
 }
