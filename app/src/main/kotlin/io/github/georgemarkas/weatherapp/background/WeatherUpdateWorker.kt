@@ -33,7 +33,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
     private val locationRepository: LocationRepository,
-    private val weatherRepository: WeatherRepository
+    private val weatherRepository: WeatherRepository,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {

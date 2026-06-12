@@ -45,7 +45,7 @@ fun WeatherLayout(
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
-    var locationGranted by remember {
+    var coarseLocationGranted by remember {
         mutableStateOf(context.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION))
     }
 
@@ -58,12 +58,15 @@ fun WeatherLayout(
 
     val permissionsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { grants ->
-        locationGranted = grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+    ) { permissions ->
+        coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            Manifest.permission.POST_NOTIFICATIONS
     }
 
-    LaunchedEffect(locationGranted) {
-        if (locationGranted && !WeatherUpdateWorker.isScheduled(context)) {
+    LaunchedEffect(coarseLocationGranted) {
+        if (coarseLocationGranted && !WeatherUpdateWorker.isScheduled(context)) {
             WeatherUpdateWorker.scheduleJob(context)
             WeatherUpdateWorker.start(context)
         }
@@ -75,7 +78,7 @@ fun WeatherLayout(
             if (context.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
 
                 if (!context.hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                    // TODO: Perhaps add some sort of alert dialog here
+                    // TODO: Perhaps add some sort of dialog popup here
                     bgLocationPermissionLauncher
                         .launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                 }
