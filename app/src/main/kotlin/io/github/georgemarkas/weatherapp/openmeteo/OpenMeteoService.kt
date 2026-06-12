@@ -43,7 +43,7 @@ class OpenMeteoService @Inject constructor(
                 current,
                 hourly,
                 daily,
-                7 // TODO: Have this be an adjustable setting
+                7
             )
         } catch (e: HttpException) {
             Timber.w(e, "Failed to fetch weather update")

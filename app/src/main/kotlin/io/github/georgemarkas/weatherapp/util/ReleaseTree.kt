@@ -1,4 +1,4 @@
-package io.github.georgemarkas.weatherapp.logging
+package io.github.georgemarkas.weatherapp.util
 
 import android.util.Log
 import timber.log.Timber
