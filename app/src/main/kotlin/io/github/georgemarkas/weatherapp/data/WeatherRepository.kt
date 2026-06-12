@@ -55,7 +55,7 @@ class WeatherRepository @Inject constructor(
     val weatherFlow: Flow<WeatherResponse?> = context.weatherDataStore.data
 
     suspend fun updateWeather(location: LocationWrapper?) {
-        if (location == null) throw WeatherException("Provided location is null")
+        if (location == null) throw IllegalArgumentException("Provided location is null")
         val weather = service.requestWeather(location)
 
         weather.onSuccess { response ->
@@ -64,7 +64,7 @@ class WeatherRepository @Inject constructor(
                 Timber.i("Updated weather")
             } else {
                 val reason = response.reason ?: "Unknown error; OpenMeteo provided no reason"
-                throw WeatherException("OpenMeteo's response contains an error: $reason")
+                throw WeatherException("OpenMeteo responded with error: $reason")
             }
         }.onFailure { e ->
                throw WeatherException("Failed to update weather", e)

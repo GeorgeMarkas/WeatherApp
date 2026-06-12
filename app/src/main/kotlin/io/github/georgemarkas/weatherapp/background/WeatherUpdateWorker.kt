@@ -13,19 +13,20 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
-import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
+import io.github.georgemarkas.weatherapp.exceptions.LocationException
 import io.github.georgemarkas.weatherapp.extensions.isOnline
 import io.github.georgemarkas.weatherapp.extensions.isRunning
 import io.github.georgemarkas.weatherapp.extensions.setForegroundSafely
 import io.github.georgemarkas.weatherapp.extensions.workManager
-import io.github.georgemarkas.weatherapp.notification.Notifications
+import io.github.georgemarkas.weatherapp.notifications.Notifications
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -53,12 +54,9 @@ class WeatherUpdateWorker @AssistedInject constructor(
 
         return withContext(Dispatchers.IO) {
             try {
-                locationRepository.updateLocation()
-                val location = locationRepository.locationFlow.first()
+                updateWeather(locationRepository, weatherRepository)
 
-                weatherRepository.updateWeather(location)
-
-                // TODO: Temporary for testing, make it not shit
+                // TODO: Temporary for testing, integrate the notification more properly
                 val weather = weatherRepository.weatherFlow.first()
                 Notifications.sendForecastNotification(context, weather!!)
 
@@ -126,18 +124,18 @@ class WeatherUpdateWorker @AssistedInject constructor(
             return true
         }
 
-        fun stop(context: Context) {
-            val workManager = context.workManager
-            val workQuery = WorkQuery.Builder.fromTags(listOf(TAG))
-                .addStates(listOf(WorkInfo.State.RUNNING))
-                .build()
-
-            workManager.getWorkInfos(workQuery).get()
-                .forEach {
-                    workManager.cancelWorkById(it.id)
-                    if (it.tags.contains(WORK_NAME_PERIODIC)) scheduleJob(context)
-                }
-        }
+//        fun stop(context: Context) {
+//            val workManager = context.workManager
+//            val workQuery = WorkQuery.Builder.fromTags(listOf(TAG))
+//                .addStates(listOf(WorkInfo.State.RUNNING))
+//                .build()
+//
+//            workManager.getWorkInfos(workQuery).get()
+//                .forEach {
+//                    workManager.cancelWorkById(it.id)
+//                    if (it.tags.contains(WORK_NAME_PERIODIC)) scheduleJob(context)
+//                }
+//        }
 
         fun isScheduled(context: Context): Boolean {
             val infos = context.workManager
@@ -147,6 +145,18 @@ class WeatherUpdateWorker @AssistedInject constructor(
             return infos.any {
                 it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING
             }
+        }
+
+        suspend fun updateWeather(
+            locationRepository: LocationRepository,
+            weatherRepository: WeatherRepository,
+        ) {
+            locationRepository.updateLocation()
+            val location = locationRepository.locationFlow.firstOrNull() ?: run {
+                throw LocationException("Repository failed to provide location")
+            }
+
+            weatherRepository.updateWeather(location)
         }
     }
 }

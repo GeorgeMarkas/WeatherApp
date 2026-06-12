@@ -5,15 +5,14 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.georgemarkas.weatherapp.background.WeatherUpdateWorker
 import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
-import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -23,7 +22,6 @@ import javax.inject.Inject
 class WeatherViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
-    private val service: OpenMeteoService
 ) : ViewModel() {
 
     private val isRefreshing = MutableStateFlow(false)
@@ -45,14 +43,13 @@ class WeatherViewModel @Inject constructor(
             isRefreshing.value = true
             try {
                 if (context.isOnline()) {
-                    locationRepository.updateLocation()
-                    val location = locationRepository.locationFlow.first()
-                    weatherRepository.updateWeather(location)
+                    WeatherUpdateWorker.updateWeather(locationRepository, weatherRepository)
                 } else {
+                    Timber.d("Can not refresh while offline")
                     Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
-                Timber.w(e, "Failed to refresh")
+                Timber.e(e, "Failed to refresh")
                 Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
             } finally {
                 isRefreshing.value = false

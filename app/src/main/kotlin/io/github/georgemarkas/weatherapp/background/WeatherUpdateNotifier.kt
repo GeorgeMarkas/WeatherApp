@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.georgemarkas.weatherapp.R
-import io.github.georgemarkas.weatherapp.notification.Notifications
+import io.github.georgemarkas.weatherapp.notifications.Notifications
 import javax.inject.Inject
 import kotlin.getValue
 

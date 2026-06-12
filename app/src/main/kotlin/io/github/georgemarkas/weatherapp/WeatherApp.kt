@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
-import io.github.georgemarkas.weatherapp.notification.Notifications
+import io.github.georgemarkas.weatherapp.notifications.Notifications
 import io.github.georgemarkas.weatherapp.util.ReleaseTree
 import timber.log.Timber
 import javax.inject.Inject

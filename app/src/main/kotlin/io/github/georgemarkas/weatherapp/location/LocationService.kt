@@ -1,13 +1,13 @@
 package io.github.georgemarkas.weatherapp.location
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.georgemarkas.weatherapp.extensions.hasPermission
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import javax.inject.Inject
@@ -56,15 +56,14 @@ class LocationService @Inject constructor(
                 .addOnSuccessListener {
                     continuation.resume(LocationWrapper(it.latitude, it.longitude))
                 }
-                .addOnFailureListener {
+                .addOnFailureListener { e ->
+                    Timber.e(e, "Fused location provider failed to supply the current location")
                     continuation.resume(null)
                 }
 
             continuation.invokeOnCancellation { cancellationTokenSource.cancel() }
         }
 
-    private fun hasLocationPermission() = ContextCompat.checkSelfPermission(
-        context,
-        android.Manifest.permission.ACCESS_COARSE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED
+    private fun hasLocationPermission() =
+        context.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
 }

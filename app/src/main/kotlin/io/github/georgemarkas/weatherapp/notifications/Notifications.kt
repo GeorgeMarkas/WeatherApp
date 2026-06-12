@@ -1,4 +1,4 @@
-package io.github.georgemarkas.weatherapp.notification
+package io.github.georgemarkas.weatherapp.notifications
 
 import android.content.Context
 import androidx.core.app.NotificationChannelCompat
