@@ -8,15 +8,16 @@ import io.github.georgemarkas.weatherapp.notifications.Notifications
 import javax.inject.Inject
 import kotlin.getValue
 
-class WeatherUpdateNotifier @Inject constructor (
+class WeatherUpdateNotifier @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     val progressNotificationBuilder by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_BACKGROUND)
             .setContentTitle(context.getString(R.string.app_name))
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // TODO: Get rid of placeholder icon
+            .setSmallIcon(R.drawable.ic_sync) // TODO: Get rid of placeholder icon
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-        // TODO: Perhaps add cancel action
     }
+
+    // TODO: Implement update error notification
 }

@@ -60,6 +60,8 @@ class WeatherUpdateWorker @AssistedInject constructor(
                 val weather = weatherRepository.weatherFlow.first()
                 Notifications.sendForecastNotification(context, weather!!)
 
+                // TODO: Show error notification if the update fails
+
                 Result.success()
             } catch (e: Exception) {
                 Timber.w(e, "Weather update failed, retrying")
@@ -124,19 +126,6 @@ class WeatherUpdateWorker @AssistedInject constructor(
             return true
         }
 
-//        fun stop(context: Context) {
-//            val workManager = context.workManager
-//            val workQuery = WorkQuery.Builder.fromTags(listOf(TAG))
-//                .addStates(listOf(WorkInfo.State.RUNNING))
-//                .build()
-//
-//            workManager.getWorkInfos(workQuery).get()
-//                .forEach {
-//                    workManager.cancelWorkById(it.id)
-//                    if (it.tags.contains(WORK_NAME_PERIODIC)) scheduleJob(context)
-//                }
-//        }
-
         fun isScheduled(context: Context): Boolean {
             val infos = context.workManager
                 .getWorkInfosForUniqueWork(WORK_NAME_PERIODIC)
@@ -151,6 +140,8 @@ class WeatherUpdateWorker @AssistedInject constructor(
             locationRepository: LocationRepository,
             weatherRepository: WeatherRepository,
         ) {
+            // TODO: Handle the update failing
+
             locationRepository.updateLocation()
             val location = locationRepository.locationFlow.firstOrNull() ?: run {
                 throw LocationException("Repository failed to provide location")
