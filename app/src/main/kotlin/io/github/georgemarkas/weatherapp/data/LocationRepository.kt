@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 val Context.locationDataStore by preferencesDataStore(name = "location")
 
-class LocationDataStore @Inject constructor(
+class LocationRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val service: LocationService
 ) {
@@ -32,10 +32,10 @@ class LocationDataStore @Inject constructor(
 
     suspend fun updateLocation() {
         val location = service.getFreshLocation() ?: run {
-            Timber.i("Failed to get current location, attempting to fall back to last known")
+            Timber.w("Failed to get current location, attempting to fall back to last known")
             service.getLastKnownLocation()
         } ?: run {
-            Timber.w("Failed to update location")
+            Timber.e("Failed to update location")
             return
         }
 

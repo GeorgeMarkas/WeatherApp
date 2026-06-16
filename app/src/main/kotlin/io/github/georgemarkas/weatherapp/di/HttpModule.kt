@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class HttpModule {
+object HttpModule {
 
     @Provides
     @Singleton
@@ -25,7 +25,7 @@ class HttpModule {
             .cache(
                 Cache(
                     File(app.cacheDir, "http_cache"),
-                    1024 * 1024 * 64
+                    1024 * 1024 * 64 // 64 MiB
                 )
             )
             .addInterceptor(logging)

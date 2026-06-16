@@ -10,4 +10,5 @@ data class WeatherResponse(
     val daily: WeatherDaily? = null,
     val error: Boolean? = null,
     val reason: String? = null,
+    val fetchedAt: Long = System.currentTimeMillis()
 )
