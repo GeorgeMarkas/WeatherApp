@@ -54,11 +54,12 @@ class WeatherUpdateWorker @AssistedInject constructor(
 
         return withContext(Dispatchers.IO) {
             try {
+                // TODO: Use user-picked location instead of current location
+                //  if such a setting has been specified
                 updateWeather(locationRepository, weatherRepository)
 
-                // TODO: Temporary for testing, integrate the notification more properly
-                val weather = weatherRepository.weatherFlow.first()
-                Notifications.sendForecastNotification(context, weather!!)
+                // TODO: Make this a settings toggle
+                Notifications.sendAlertNotification(context, weatherRepository.weatherFlow.first()!!)
 
                 // TODO: Show error notification if the update fails
 
@@ -136,6 +137,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
             }
         }
 
+        // TODO: Get rid of this function, it's redundant
         suspend fun updateWeather(
             locationRepository: LocationRepository,
             weatherRepository: WeatherRepository,
