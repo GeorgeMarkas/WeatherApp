@@ -8,7 +8,6 @@
     <string name="notification_channel_background">Background services</string>
     <string name="notification_channel_forecast">Forecasts</string>
 
-
     <!-- Weather code descriptions (WMO 4677) -->
     <string name="openmeteo_clear_sky">Clear sky</string>
     <string name="openmeteo_mainly_clear">Mostly clear</string>
@@ -38,4 +37,26 @@
     <string name="openmeteo_thunderstorm_slight_or_moderate">Thunderstorm slight or moderate</string>
     <string name="openmeteo_thunderstorm_with_slight_hail">Thunderstorm with slight hail</string>
     <string name="openmeteo_thunderstorm_with_heavy_hail">Thunderstorm with heavy hail</string>
+
+    <!-- Weather alerts -->
+    <string name="alert_severity_advisory">Advisory</string>
+    <string name="alert_severity_warning">Warning</string>
+    <string name="alert_severity_severe">Severe</string>
+
+    <string name="alert_thunderstorm_title">Thunderstorm</string>
+    <string name="alert_heavy_rain_title">Heavy rain</string>
+    <string name="alert_heavy_snow_title">Heavy snow</string>
+    <string name="alert_freezing_rain_title">Freezing rain</string>
+    <string name="alert_high_wind_title">High wind</string>
+    <string name="alert_extreme_heat_title">Extreme heat</string>
+    <string name="alert_extreme_cold_title">Extreme cold</string>
+
+    <string name="alert_thunderstorm_message">Thunderstorms expected. Seek shelter and avoid open areas.</string>
+    <string name="alert_heavy_rain_message">Heavy rain expected. Watch for flooding and poor visibility.</string>
+    <string name="alert_heavy_snow_message">Heavy snow expected. Expect hazardous travel conditions.</string>
+    <string name="alert_freezing_rain_message">Freezing rain expected. Surfaces may be icy.</string>
+    <string name="alert_high_wind_message">Winds up to %1$d km/h. Secure loose objects.</string>
+    <string name="alert_extreme_heat_message">Temperatures reaching %1$d%2$s. Stay hydrated and avoid sun.</string>
+    <string name="alert_extreme_cold_message">Temperatures down to %1$d%2$s. Risk of frostbite, dress warm.</string>
+
 </resources>

@@ -5,12 +5,13 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationChannelGroupCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.NotificationManagerCompat.IMPORTANCE_DEFAULT
 import androidx.core.app.NotificationManagerCompat.IMPORTANCE_HIGH
 import androidx.core.app.NotificationManagerCompat.IMPORTANCE_MIN
 import io.github.georgemarkas.weatherapp.R
+import io.github.georgemarkas.weatherapp.alerts.AlertFormatter
+import io.github.georgemarkas.weatherapp.alerts.Alerts
+import io.github.georgemarkas.weatherapp.alerts.models.AlertSeverity
 import io.github.georgemarkas.weatherapp.extensions.notify
-import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
 
 object Notifications {
@@ -21,9 +22,6 @@ object Notifications {
 
     const val CHANNEL_BACKGROUND = "background"
     const val ID_BACKGROUND = 1
-
-    const val CHANNEL_FORECAST = "forecast"
-    const val ID_FORECAST = 2
 
     fun createNotificationChannels(context: Context) {
         val notificationManager = NotificationManagerCompat.from(context)
@@ -47,33 +45,43 @@ object Notifications {
                     .setName(context.getString(R.string.notification_channel_background))
                     .setGroup(GROUP_WEATHER_APP)
                     .setShowBadge(false)
-                    .build(),
-
-                NotificationChannelCompat.Builder(CHANNEL_FORECAST, IMPORTANCE_DEFAULT)
-                    .setName(context.getString(R.string.notification_channel_forecast))
-                    .setGroup(GROUP_WEATHER_APP)
                     .build()
             )
         )
     }
 
-    // TODO: Simple example, implement something a tad nicer
-    fun sendForecastNotification(
+    fun sendAlertNotification(
         context: Context,
         weather: WeatherResponse
     ) {
-        val weatherText = OpenMeteoService
-            .getWeatherCodeDescription(context, weather.current?.weatherCode)
+        val alerts = Alerts.checkForAlerts(weather)
 
-        val content = "${weatherText}, ${weather.current?.temperature}°C"
+        // If there are no alerts, clear any stale one left
+        if (alerts.isEmpty()) {
+            NotificationManagerCompat.from(context).cancel(ID_ALERT)
+            return
+        }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_FORECAST)
-            .setContentTitle(context.getString(R.string.app_name))
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentText(content)
+        val mostSevere = alerts.first()
+
+        val title = "${AlertFormatter.severityLabel(context, mostSevere.severity)} - " +
+                AlertFormatter.title(context, mostSevere.type)
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ALERT)
+            .setContentTitle(title)
+            .setContentText(AlertFormatter.message(context, mostSevere))
+            .setSmallIcon(R.drawable.ic_notify_warning)
+            .setPriority(mostSevere.severity.toPriority())
             .setOnlyAlertOnce(true)
+            .setAutoCancel(true)
             .build()
 
-        context.notify(ID_FORECAST, notification)
+        context.notify(ID_ALERT, notification)
+    }
+
+    private fun AlertSeverity.toPriority(): Int = when (this) {
+        AlertSeverity.SEVERE -> NotificationCompat.PRIORITY_HIGH
+        AlertSeverity.WARNING -> NotificationCompat.PRIORITY_DEFAULT
+        AlertSeverity.ADVISORY -> NotificationCompat.PRIORITY_LOW
     }
 }

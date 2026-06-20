@@ -34,7 +34,7 @@ class WeatherViewModel @Inject constructor(
         }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
+                started = SharingStarted.WhileSubscribed(5000L),
                 initialValue = WeatherUiState(isLoading = true)
             )
 
