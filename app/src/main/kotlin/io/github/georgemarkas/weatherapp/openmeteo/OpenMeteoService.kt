@@ -3,32 +3,39 @@ package io.github.georgemarkas.weatherapp.openmeteo
 import android.content.Context
 import io.github.georgemarkas.weatherapp.R
 import io.github.georgemarkas.weatherapp.location.LocationWrapper
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherCurrent
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherDaily
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherHourly
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherCurrent
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherDaily
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherHourly
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.geocoding.GeocodingResponse
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Inject
 
 class OpenMeteoService @Inject constructor(
     private val client: OkHttpClient,
+    converterFactory: Converter.Factory
 ) {
-    private val json = Json { ignoreUnknownKeys = true }
-
     private val forecastApiImpl: OpenMeteoForecastApi = Retrofit.Builder()
         .baseUrl(OPEN_METEO_API_URL)
         .client(client)
-        .addConverterFactory(
-            json.asConverterFactory("application/json".toMediaType())
-        )
+        .addConverterFactory(converterFactory)
         .build()
         .create(OpenMeteoForecastApi::class.java)
 
+    private val geocodingApiImpl: OpenMeteoGeocodingApi = Retrofit.Builder()
+        .baseUrl(OPEN_METEO_API_URL)
+        .client(client)
+        .addConverterFactory(converterFactory)
+        .build()
+        .create(OpenMeteoGeocodingApi::class.java)
+
+    /**
+     * Fetches fully fledged weather information for the given location from OpenMeteo's
+     * weather forecast API.
+     */
     suspend fun requestWeather(location: LocationWrapper): Result<WeatherResponse> {
         val current = stringifySerialNames(WeatherCurrent.serializer().descriptor)
         val hourly = stringifySerialNames(WeatherHourly.serializer().descriptor)
@@ -46,6 +53,14 @@ class OpenMeteoService @Inject constructor(
         }
     }
 
+    /**
+     * Fetches a list of matching locations for the given string query from OpenMeteo's
+     * geocoding API.
+     */
+    suspend fun requestGeocodedLocations(query: String): Result<GeocodingResponse> {
+        return runCatching { geocodingApiImpl.searchLocations(query) }
+    }
+
     private fun stringifySerialNames(descriptor: SerialDescriptor): String =
         Array(descriptor.elementsCount) { descriptor.getElementName(it) }
             .filter { it != "time" } // This is returned automatically
@@ -54,6 +69,9 @@ class OpenMeteoService @Inject constructor(
     companion object {
         private const val OPEN_METEO_API_URL = "https://api.open-meteo.com/"
 
+        /**
+         * Returns the description text for the given WMO 4677 weather code.
+         */
         fun getWeatherCodeDescription(
             context: Context,
             code: Int?

@@ -16,10 +16,8 @@ import androidx.work.WorkInfo
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
-import io.github.georgemarkas.weatherapp.exceptions.LocationException
 import io.github.georgemarkas.weatherapp.extensions.isOnline
 import io.github.georgemarkas.weatherapp.extensions.isRunning
 import io.github.georgemarkas.weatherapp.extensions.setForegroundSafely
@@ -27,7 +25,6 @@ import io.github.georgemarkas.weatherapp.extensions.workManager
 import io.github.georgemarkas.weatherapp.notifications.Notifications
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -36,7 +33,6 @@ import java.util.concurrent.TimeUnit
 class WeatherUpdateWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
-    private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository,
     private val notifier: WeatherUpdateNotifier
@@ -55,9 +51,8 @@ class WeatherUpdateWorker @AssistedInject constructor(
 
         return withContext(Dispatchers.IO) {
             try {
-                // TODO: Use user-picked location instead of current location
-                //  if such a setting has been specified
-                updateWeatherWithCurrentLocation(locationRepository, weatherRepository)
+                // TODO: Use the user-specified location should it be chosen from settings
+                weatherRepository.currentLocationWeatherUpdate()
 
                 val alertsEnabled = settingsRepository.settingsFlow.first().weatherAlerts
                 if (alertsEnabled) {
@@ -146,20 +141,6 @@ class WeatherUpdateWorker @AssistedInject constructor(
             return infos.any {
                 it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING
             }
-        }
-
-        suspend fun updateWeatherWithCurrentLocation(
-            locationRepository: LocationRepository,
-            weatherRepository: WeatherRepository,
-        ) {
-            // TODO: Handle the update failing
-
-            locationRepository.updateLocation()
-            val location = locationRepository.locationFlow.firstOrNull() ?: run {
-                throw LocationException("Repository failed to provide location")
-            }
-
-            weatherRepository.updateWeather(location)
         }
     }
 }

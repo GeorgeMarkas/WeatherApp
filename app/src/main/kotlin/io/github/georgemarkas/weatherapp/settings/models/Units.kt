@@ -5,15 +5,21 @@ import io.github.georgemarkas.weatherapp.R
 
 enum class Units(
     @param:StringRes val labelRes: Int,
-    val temperature: String
+    val temperature: String,
+    val windSpeed: String,
+    val precipitation: String,
 ) {
     METRIC(
         R.string.setting_units_metric,
-        "°C"
+        "°C",
+        "km/h",
+        "mm"
     ),
 
     IMPERIAL(
         R.string.setting_units_imperial,
-        "°F"
+        "°F",
+        "mph",
+        "in"
     ),
 }

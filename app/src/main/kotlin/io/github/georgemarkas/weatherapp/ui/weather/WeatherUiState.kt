@@ -1,7 +1,7 @@
 package io.github.georgemarkas.weatherapp.ui.weather
 
 import io.github.georgemarkas.weatherapp.settings.Settings
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherResponse
 
 data class WeatherUiState(
     val isLoading: Boolean = false,

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.georgemarkas.weatherapp.background.WeatherUpdateWorker
-import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
@@ -23,7 +22,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -73,7 +71,8 @@ class WeatherViewModel @Inject constructor(
             isRefreshing.value = true
             try {
                 if (context.isOnline()) {
-                    WeatherUpdateWorker.updateWeatherWithCurrentLocation(locationRepository, weatherRepository)
+                    // TODO: Use the user-specified location should it be chosen from settings
+                    weatherRepository.currentLocationWeatherUpdate()
                 } else {
                     Timber.d("Can not refresh while offline")
                     Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()

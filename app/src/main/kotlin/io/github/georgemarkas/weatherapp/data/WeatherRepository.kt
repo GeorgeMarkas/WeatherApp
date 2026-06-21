@@ -6,12 +6,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.georgemarkas.weatherapp.exceptions.LocationException
 import io.github.georgemarkas.weatherapp.exceptions.WeatherException
 import io.github.georgemarkas.weatherapp.location.LocationWrapper
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -50,9 +52,29 @@ object WeatherResponseSerializer : Serializer<WeatherResponse?> {
 
 class WeatherRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    private val repository: LocationRepository,
     private val service: OpenMeteoService
 ) {
     val weatherFlow: Flow<WeatherResponse?> = context.weatherDataStore.data
+
+    /**
+     * Fetches fresh weather data for the current location and saves it.
+     */
+    suspend fun currentLocationWeatherUpdate() {
+        repository.updateCurrentLocation()
+        val location = repository.currentLocationFlow.firstOrNull() ?: run {
+            throw LocationException("Repository failed to provide location")
+        }
+
+        updateWeather(location)
+    }
+
+    /**
+     * Fetches fresh weather data for the given location and saves it.
+     */
+    suspend fun specifiedLocationWeatherUpdate(location: LocationWrapper) {
+        updateWeather(location)
+    }
 
     suspend fun updateWeather(location: LocationWrapper?) {
         if (location == null) throw IllegalArgumentException("Provided location is null")
