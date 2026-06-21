@@ -33,6 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.georgemarkas.weatherapp.background.WeatherUpdateWorker
 import io.github.georgemarkas.weatherapp.extensions.hasPermission
+import io.github.georgemarkas.weatherapp.settings.models.Units
+import io.github.georgemarkas.weatherapp.util.celsiusToFahrenheit
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -68,10 +70,8 @@ fun WeatherLayout(
 
     // TODO: This is most likely crap and needs to be redone
     LaunchedEffect(coarseLocationGranted) {
-        if (coarseLocationGranted && !WeatherUpdateWorker.isScheduled(context)) {
-            WeatherUpdateWorker.scheduleJob(context)
-            WeatherUpdateWorker.start(context)
-        }
+        if (coarseLocationGranted && !WeatherUpdateWorker.isScheduled(context))
+            viewModel.scheduleInitialJob(context)
     }
 
     LaunchedEffect(lifecycleOwner) {
@@ -121,8 +121,14 @@ fun WeatherLayout(
                 }
 
                 uiState.weather != null -> {
+                    val temperatureUnit = uiState.settings.units.temperature
+
+                    var temperature = uiState.weather?.current?.temperature!!
+                    if (uiState.settings.units == Units.IMPERIAL)
+                        temperature = celsiusToFahrenheit(temperature)
+
                     Text(
-                        text = "${uiState.weather!!.current?.temperature}°C",
+                        text = "$temperature${temperatureUnit}",
                         style = MaterialTheme.typography.displayLarge,
                     )
 
@@ -137,10 +143,15 @@ fun WeatherLayout(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    val temperatureMin = uiState.weather!!.daily?.temperatureMin?.get(0)
-                    val temperatureMax = uiState.weather!!.daily?.temperatureMax?.get(0)
+                    var temperatureMin = uiState.weather!!.daily?.temperatureMin?.get(0)
+                    var temperatureMax = uiState.weather!!.daily?.temperatureMin?.get(0)
+                    if (uiState.settings.units == Units.IMPERIAL) {
+                        temperatureMin = celsiusToFahrenheit(temperatureMin!!)
+                        temperatureMax = celsiusToFahrenheit(temperatureMax!!)
+                    }
+
                     Text(
-                        text = "Low $temperatureMin°C • High $temperatureMax°C",
+                        text = "Low $temperatureMin${temperatureUnit} • High $temperatureMax${temperatureUnit}",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Spacer(Modifier.height(8.dp))

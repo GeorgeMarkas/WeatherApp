@@ -17,6 +17,7 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.georgemarkas.weatherapp.data.LocationRepository
+import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.exceptions.LocationException
 import io.github.georgemarkas.weatherapp.extensions.isOnline
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.minutes
 
 @HiltWorker
 class WeatherUpdateWorker @AssistedInject constructor(
@@ -38,6 +38,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
+    private val settingsRepository: SettingsRepository,
     private val notifier: WeatherUpdateNotifier
 ) : CoroutineWorker(context, params) {
 
@@ -58,8 +59,13 @@ class WeatherUpdateWorker @AssistedInject constructor(
                 //  if such a setting has been specified
                 updateWeather(locationRepository, weatherRepository)
 
-                // TODO: Make this a settings toggle
-                Notifications.sendAlertNotification(context, weatherRepository.weatherFlow.first()!!)
+                val alertsEnabled = settingsRepository.settingsFlow.first().weatherAlerts
+                if (alertsEnabled) {
+                    val units = settingsRepository.settingsFlow.first().units
+                    val weather = weatherRepository.weatherFlow.first()!!
+
+                    Notifications.sendAlertNotification(context, weather, units)
+                }
 
                 // TODO: Show error notification if the update fails
 
@@ -84,14 +90,17 @@ class WeatherUpdateWorker @AssistedInject constructor(
         private const val WORK_NAME_ONE_SHOT = "weather_update_one_shot"
         private const val BACKOFF_DELAY: Long = 10
 
-        fun scheduleJob(context: Context) {
-            val updateInterval = 15.minutes // TODO: Have this be a setting
+        suspend fun scheduleJob(
+            context: Context,
+            repository: SettingsRepository
+        ) {
+            val updateInterval = repository.settingsFlow.first().updateInterval
             val constraints = Constraints(
                 requiredNetworkType = NetworkType.CONNECTED
             )
 
             val request = PeriodicWorkRequestBuilder<WeatherUpdateWorker>(
-                updateInterval.inWholeMinutes,
+                updateInterval.minutes,
                 TimeUnit.MINUTES,
                 BACKOFF_DELAY,
                 TimeUnit.MINUTES

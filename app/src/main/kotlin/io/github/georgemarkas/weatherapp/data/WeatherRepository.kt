@@ -20,6 +20,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
 
+// TODO: Perhaps have this be in a module
 val Context.weatherDataStore: DataStore<WeatherResponse?> by dataStore(
     fileName = "weather.json",
     serializer = WeatherResponseSerializer

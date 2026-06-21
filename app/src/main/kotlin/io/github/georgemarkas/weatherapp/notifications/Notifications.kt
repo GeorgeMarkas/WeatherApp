@@ -12,6 +12,7 @@ import io.github.georgemarkas.weatherapp.alerts.AlertFormatter
 import io.github.georgemarkas.weatherapp.alerts.Alerts
 import io.github.georgemarkas.weatherapp.alerts.models.AlertSeverity
 import io.github.georgemarkas.weatherapp.extensions.notify
+import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
 
 object Notifications {
@@ -52,7 +53,8 @@ object Notifications {
 
     fun sendAlertNotification(
         context: Context,
-        weather: WeatherResponse
+        weather: WeatherResponse,
+        units: Units
     ) {
         val alerts = Alerts.checkForAlerts(weather)
 
@@ -69,7 +71,7 @@ object Notifications {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ALERT)
             .setContentTitle(title)
-            .setContentText(AlertFormatter.message(context, mostSevere))
+            .setContentText(AlertFormatter.message(context, mostSevere, units))
             .setSmallIcon(R.drawable.ic_notify_warning)
             .setPriority(mostSevere.severity.toPriority())
             .setOnlyAlertOnce(true)

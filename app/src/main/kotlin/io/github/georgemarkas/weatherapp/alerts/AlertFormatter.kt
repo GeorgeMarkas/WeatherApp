@@ -5,6 +5,7 @@ import io.github.georgemarkas.weatherapp.R
 import io.github.georgemarkas.weatherapp.alerts.models.Alert
 import io.github.georgemarkas.weatherapp.alerts.models.AlertSeverity
 import io.github.georgemarkas.weatherapp.alerts.models.AlertType
+import io.github.georgemarkas.weatherapp.settings.models.Units
 import kotlin.math.roundToInt
 
 object AlertFormatter {
@@ -32,11 +33,11 @@ object AlertFormatter {
     fun message(
         context: Context,
         alert: Alert,
+        units: Units
     ): String {
-        // TODO: Make this be based on user settings
-        val unit = "°C"
-
+        val unit = units.temperature
         val value = alert.value?.roundToInt()
+
         return when (alert.type) {
             AlertType.HIGH_WIND ->
                 context.getString(R.string.alert_high_wind_message, value)
