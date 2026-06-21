@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.georgemarkas.weatherapp.ui.WeatherScreen
 import io.github.georgemarkas.weatherapp.ui.theme.WeatherAppTheme
-import io.github.georgemarkas.weatherapp.ui.weather.WeatherLayout
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    WeatherLayout(modifier = Modifier.padding(innerPadding))
+                    WeatherScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }

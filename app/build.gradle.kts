@@ -95,4 +95,7 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.converter.kotlinx.serialization)
+
+    // Material icons
+    implementation(libs.androidx.compose.material.icons.core)
 }
