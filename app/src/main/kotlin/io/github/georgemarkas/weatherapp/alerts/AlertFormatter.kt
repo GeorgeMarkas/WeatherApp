@@ -10,6 +10,9 @@ import kotlin.math.roundToInt
 
 object AlertFormatter {
 
+    /**
+     * Returns the title text for the given alert type.
+     */
     fun title(context: Context, type: AlertType): String = context.getString(
         when (type) {
             AlertType.THUNDERSTORM -> R.string.alert_thunderstorm_title
@@ -22,6 +25,9 @@ object AlertFormatter {
         }
     )
 
+    /**
+     * Returns the label text for the given alert severity.
+     */
     fun severityLabel(context: Context, severity: AlertSeverity): String = context.getString(
         when (severity) {
             AlertSeverity.ADVISORY -> R.string.alert_severity_advisory
@@ -30,6 +36,9 @@ object AlertFormatter {
         }
     )
 
+    /**
+     * Returns the message text for the given alert.
+     */
     fun message(
         context: Context,
         alert: Alert,

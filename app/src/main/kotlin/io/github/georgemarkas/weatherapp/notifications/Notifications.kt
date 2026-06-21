@@ -13,7 +13,7 @@ import io.github.georgemarkas.weatherapp.alerts.Alerts
 import io.github.georgemarkas.weatherapp.alerts.models.AlertSeverity
 import io.github.georgemarkas.weatherapp.extensions.notify
 import io.github.georgemarkas.weatherapp.settings.models.Units
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherResponse
 
 object Notifications {
     private const val GROUP_WEATHER_APP = "group_weather_app"
@@ -51,6 +51,11 @@ object Notifications {
         )
     }
 
+    /**
+     * Sends a weather alert notification if the given weather data indicates
+     * hazardous weather potential. Will also clear previous alerts if none are
+     * present anymore.
+     */
     fun sendAlertNotification(
         context: Context,
         weather: WeatherResponse,

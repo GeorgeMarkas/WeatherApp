@@ -3,10 +3,10 @@ package io.github.georgemarkas.weatherapp.alerts
 import io.github.georgemarkas.weatherapp.alerts.models.Alert
 import io.github.georgemarkas.weatherapp.alerts.models.AlertSeverity
 import io.github.georgemarkas.weatherapp.alerts.models.AlertType
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherCurrent
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherDaily
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherHourly
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherCurrent
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherDaily
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherHourly
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherResponse
 import kotlin.time.Clock
 
 object Alerts {
@@ -23,6 +23,10 @@ object Alerts {
 
     private const val FORECAST_WINDOW_SECONDS = 24 * 3600L
 
+    /**
+     * Checks the given weather data for potential hazardous weather and
+     * returns a sorted list of the most severe alerts of each type.
+     */
     fun checkForAlerts(response: WeatherResponse): List<Alert> {
         val alerts = buildList {
             response.current?.let { addAll(currentAlerts(it)) }

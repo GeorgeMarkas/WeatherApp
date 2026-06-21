@@ -1,6 +1,6 @@
 package io.github.georgemarkas.weatherapp.openmeteo
 
-import io.github.georgemarkas.weatherapp.openmeteo.models.WeatherResponse
+import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
