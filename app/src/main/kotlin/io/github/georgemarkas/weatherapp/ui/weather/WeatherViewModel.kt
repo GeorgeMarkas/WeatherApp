@@ -73,7 +73,7 @@ class WeatherViewModel @Inject constructor(
             isRefreshing.value = true
             try {
                 if (context.isOnline()) {
-                    WeatherUpdateWorker.updateWeather(locationRepository, weatherRepository)
+                    WeatherUpdateWorker.updateWeatherWithCurrentLocation(locationRepository, weatherRepository)
                 } else {
                     Timber.d("Can not refresh while offline")
                     Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()

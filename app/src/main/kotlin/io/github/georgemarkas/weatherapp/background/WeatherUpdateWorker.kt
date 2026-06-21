@@ -57,7 +57,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
             try {
                 // TODO: Use user-picked location instead of current location
                 //  if such a setting has been specified
-                updateWeather(locationRepository, weatherRepository)
+                updateWeatherWithCurrentLocation(locationRepository, weatherRepository)
 
                 val alertsEnabled = settingsRepository.settingsFlow.first().weatherAlerts
                 if (alertsEnabled) {
@@ -116,6 +116,8 @@ class WeatherUpdateWorker @AssistedInject constructor(
                 ExistingPeriodicWorkPolicy.UPDATE,
                 request
             )
+
+            Timber.d("Job (re)scheduled with an interval of ${updateInterval.minutes}")
         }
 
         fun start(context: Context): Boolean {
@@ -146,8 +148,7 @@ class WeatherUpdateWorker @AssistedInject constructor(
             }
         }
 
-        // TODO: Get rid of this function, it's redundant
-        suspend fun updateWeather(
+        suspend fun updateWeatherWithCurrentLocation(
             locationRepository: LocationRepository,
             weatherRepository: WeatherRepository,
         ) {

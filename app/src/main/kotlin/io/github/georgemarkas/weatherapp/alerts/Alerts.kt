@@ -11,8 +11,7 @@ import kotlin.time.Clock
 
 object Alerts {
 
-    // These are all in metric since that's what OpenMeteo defaults to,
-    // will convert to imperial should it be chosen by the user.
+    // These are all in metric since that's what OpenMeteo defaults to
     private const val HEAT_WARNING = 35.0
     private const val HEAT_SEVERE = 40.0
 
@@ -22,7 +21,7 @@ object Alerts {
     private const val WIND_WARNING = 60.0
     private const val WIND_SEVERE = 90.0
 
-    private const val FORECAST_WINDOW_SECONDS = 24 * 3600L // 24 hours
+    private const val FORECAST_WINDOW_SECONDS = 24 * 3600L
 
     fun checkForAlerts(response: WeatherResponse): List<Alert> {
         val alerts = buildList {

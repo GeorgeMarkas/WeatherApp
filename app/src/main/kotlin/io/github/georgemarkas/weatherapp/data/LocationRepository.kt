@@ -12,14 +12,13 @@ import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
-// TODO: Perhaps have this be provided by a module
 val Context.locationDataStore by preferencesDataStore(name = "location")
 
 class LocationRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val service: LocationService
 ) {
-    private companion object {
+    companion object {
         val LATITUDE = doublePreferencesKey("latitude")
         val LONGITUDE = doublePreferencesKey("longitude")
     }
