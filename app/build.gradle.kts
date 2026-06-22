@@ -19,7 +19,8 @@ android {
     defaultConfig {
         applicationId = "io.github.georgemarkas.weatherapp"
         minSdk = 29
-        targetSdk = 37
+        //noinspection OldTargetApi
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -46,6 +47,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -68,9 +75,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-
-    // Logging
-    implementation(libs.timber)
 
     // DI
     ksp(libs.hilt.android.compiler)
@@ -95,6 +99,13 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.converter.kotlinx.serialization)
+
+    // Logging
+    implementation(libs.timber)
+
+    // Testing
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.core)
 
     // Material icons
     implementation(libs.androidx.compose.material.icons.core)
