@@ -36,7 +36,7 @@ class NotificationsTest {
     // Faking an extreme heat alert
     private fun severeWeather() = WeatherResponse(
         current = WeatherCurrent(
-            temperature = 41.0,
+            temperature = 41.0, // Severe heat threshold  is 40 degrees
             weatherCode = null,
             relativeHumidity = null,
             windSpeed = null,
@@ -63,7 +63,7 @@ class NotificationsTest {
     }
 
     @Test
-    fun sendAlertNotification_postsAlert_whenSevereWeatherDetected() {
+    fun sendAlertNotification_postsAlert_whenWeatherSevere() {
         Notifications.sendAlertNotification(context, severeWeather(), Units.METRIC)
 
         val shadow = shadowOf(notificationManager)
