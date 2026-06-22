@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.georgemarkas.weatherapp.background.WeatherUpdateWorker
+import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
@@ -22,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
+    locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -30,11 +32,13 @@ class WeatherViewModel @Inject constructor(
 
     val uiState: StateFlow<WeatherUiState> =
         combine(
+            locationRepository.currentLocationFlow,
             weatherRepository.weatherFlow,
             settingsRepository.settingsFlow,
             isRefreshing
-        ) { weather, settings, isRefreshing ->
+        ) { locality, weather, settings, isRefreshing ->
             WeatherUiState(
+                locality = locality?.locality,
                 weather = weather,
                 settings = settings,
                 isRefreshing = isRefreshing
