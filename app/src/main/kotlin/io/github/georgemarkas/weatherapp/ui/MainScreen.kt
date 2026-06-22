@@ -1,5 +1,10 @@
 package io.github.georgemarkas.weatherapp.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,25 +33,48 @@ fun WeatherScreen(
 ) {
     var showSettings by rememberSaveable { mutableStateOf(false) }
 
-    if (showSettings) {
-        SettingsScreen(onBack = { showSettings = false }, viewModel = viewModel)
-        return
-    }
+    AnimatedContent(
+        targetState = showSettings,
+        transitionSpec = {
+            if (targetState) {
+                slideInHorizontally(
+                    animationSpec = tween(durationMillis = 170),
+                    initialOffsetX = { it }
+                ) togetherWith slideOutHorizontally(
+                    animationSpec = tween(durationMillis = 170),
+                    targetOffsetX = { -it }
+                )
+            } else {
+                slideInHorizontally(
+                    animationSpec = tween(durationMillis = 170),
+                    initialOffsetX = { -it }
+                ) togetherWith slideOutHorizontally(
+                    animationSpec = tween(durationMillis = 170),
+                    targetOffsetX = { it }
+                )
+            }
+        },
+        label = "weather_settings_transition",
+    ) { settingsVisible ->
+        if (settingsVisible) {
+            SettingsScreen(onBack = { showSettings = false }, viewModel = viewModel)
+        } else {
+            Box(modifier = modifier.fillMaxSize()) {
+                WeatherLayout(viewModel = viewModel)
 
-    Box(modifier = modifier.fillMaxSize()) {
-        WeatherLayout(viewModel = viewModel)
-
-        IconButton(
-            onClick = { showSettings = true },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(8.dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_settings),
-                contentDescription = "Settings"
-            )
+                IconButton(
+                    onClick = { showSettings = true },
+                    modifier = modifier
+                        .align(Alignment.TopEnd)
+                        .statusBarsPadding()
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_settings),
+                        contentDescription = "Settings"
+                    )
+                }
+            }
         }
     }
 }
