@@ -10,6 +10,7 @@ import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
+import io.github.georgemarkas.weatherapp.location.LocationWrapper
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.settings.models.UpdateInterval
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    locationRepository: LocationRepository,
+    private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -68,6 +69,14 @@ class WeatherViewModel @Inject constructor(
 
     fun setWeatherAlerts(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setWeatherAlerts(enabled) }
+    }
+
+    fun setSpecificLocationEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setSpecificLocationEnabled(enabled) }
+    }
+
+    fun setSpecifiedLocation(location: LocationWrapper) {
+        viewModelScope.launch { locationRepository.updateSpecifiedLocation(location) }
     }
 
     fun refresh(context: Context) {

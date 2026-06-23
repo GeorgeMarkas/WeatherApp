@@ -23,6 +23,7 @@ class SettingsRepository @Inject constructor(
         val UPDATE_INTERVAL = longPreferencesKey("update_interval")
         val UNITS = stringPreferencesKey("units")
         val WEATHER_ALERTS = booleanPreferencesKey("weather_alerts")
+        val SPECIFIC_LOCATION = booleanPreferencesKey("specific_location")
     }
 
     val settingsFlow: Flow<Settings> = context.settingsDataStore.data.map { preferences ->
@@ -35,7 +36,10 @@ class SettingsRepository @Inject constructor(
                 runCatching { Units.valueOf(it) }.getOrNull()
             } ?: Units.METRIC,
 
-            weatherAlerts = preferences[Keys.WEATHER_ALERTS] ?: false
+            weatherAlerts = preferences[Keys.WEATHER_ALERTS] ?: false,
+
+            specificLocation = preferences[Keys.SPECIFIC_LOCATION] ?: false
+
         )
     }
 
@@ -49,5 +53,9 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setWeatherAlerts(enabled: Boolean) {
         context.settingsDataStore.edit { it[Keys.WEATHER_ALERTS] = enabled }
+    }
+
+    suspend fun setSpecificLocationEnabled(enabled: Boolean) {
+        context.settingsDataStore.edit { it[Keys.SPECIFIC_LOCATION] = enabled }
     }
 }
