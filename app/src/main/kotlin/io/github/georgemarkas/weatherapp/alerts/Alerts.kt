@@ -87,15 +87,13 @@ object Alerts {
      */
     private fun dailyAlerts(daily: WeatherDaily): List<Alert> = buildList {
         daily.temperatureMax?.forEachIndexed { i, temperature ->
-            if (temperature != null) heatSeverity(temperature)?.let {
-                add(Alert(AlertType.EXTREME_HEAT, it, daily.time.getOrNull(i), temperature))
-            }
+            if (temperature != null)
+                temperatureAlerts(temperature, daily.time.getOrNull(i), this)
         }
 
         daily.temperatureMin?.forEachIndexed { i, temperature ->
-            if (temperature != null) coldSeverity(temperature)?.let {
-                add(Alert(AlertType.EXTREME_COLD, it, daily.time.getOrNull(i), temperature))
-            }
+            if (temperature != null)
+                temperatureAlerts(temperature, daily.time.getOrNull(i), this)
         }
     }
 
