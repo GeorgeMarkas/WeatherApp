@@ -3,6 +3,7 @@ package io.github.georgemarkas.weatherapp.location
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Location
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -16,10 +17,10 @@ import kotlin.coroutines.resume
 @SuppressLint("MissingPermission")
 class LocationService @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val locationClient: FusedLocationProviderClient
+    private val locationClient: FusedLocationProviderClient,
 ) {
 
-    suspend fun getLastKnownLocation(): LocationWrapper? =
+    suspend fun getLastKnownLocation(): Location? =
         suspendCancellableCoroutine { continuation ->
 
             if (!hasLocationPermission()) {
@@ -30,14 +31,14 @@ class LocationService @Inject constructor(
 
             locationClient.lastLocation
                 .addOnSuccessListener {
-                    continuation.resume(LocationWrapper(it.latitude, it.longitude))
+                    continuation.resume(it)
                 }
                 .addOnFailureListener {
                     continuation.resume(null)
                 }
         }
 
-    suspend fun getFreshLocation(): LocationWrapper? =
+    suspend fun getFreshLocation(): Location? =
         suspendCancellableCoroutine { continuation ->
 
             val cancellationTokenSource = CancellationTokenSource()
@@ -54,7 +55,7 @@ class LocationService @Inject constructor(
                 cancellationTokenSource.token
             )
                 .addOnSuccessListener {
-                    continuation.resume(LocationWrapper(it.latitude, it.longitude))
+                    continuation.resume(it)
                 }
                 .addOnFailureListener { e ->
                     Timber.e(e, "Fused location provider failed to supply the current location")

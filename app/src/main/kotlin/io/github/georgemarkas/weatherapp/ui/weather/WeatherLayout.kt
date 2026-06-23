@@ -121,6 +121,12 @@ fun WeatherLayout(
                 }
 
                 uiState.weather != null -> {
+                    Text(
+                        text = "${uiState.locality}",
+                        style =  MaterialTheme.typography.displayMedium
+                    )
+                    Spacer(Modifier.height(10.dp))
+
                     val temperatureUnit = uiState.settings.units.temperature
 
                     var temperature = uiState.weather?.current?.temperature!!
