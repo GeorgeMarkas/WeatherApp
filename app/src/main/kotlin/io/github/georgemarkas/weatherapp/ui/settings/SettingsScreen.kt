@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,9 +59,11 @@ fun SettingsScreen(
         mutableStateOf(settings.specificLocation)
     }
 
-    var showUnitDialog                  by remember { mutableStateOf(false) }
-    var showUpdateIntervalDialog        by remember { mutableStateOf(false) }
-    var showLocationPreferenceDialog    by remember { mutableStateOf(false) }
+    var showUnitDialog                      by remember { mutableStateOf(false) }
+    var showUpdateIntervalDialog            by remember { mutableStateOf(false) }
+    var showLocationPreferenceDialog        by remember { mutableStateOf(false) }
+    var showWeatherAlertsDialog             by remember { mutableStateOf(false) }
+    var showLocationPreferenceFieldDialog   by remember { mutableStateOf(false) }
 
     if (showUnitDialog) {
         PopupDialog(onDismissRequest = { showUnitDialog = false }) {
@@ -73,7 +76,6 @@ fun SettingsScreen(
             }
         }
     }
-
     if (showUpdateIntervalDialog) {
         PopupDialog(onDismissRequest = { showUpdateIntervalDialog = false }) {
             UpdateInterval.entries.forEach { interval ->
@@ -85,7 +87,6 @@ fun SettingsScreen(
             }
         }
     }
-
     if (showLocationPreferenceDialog) {
         PopupDialog(onDismissRequest = { showLocationPreferenceDialog = false }) {
             RadioRow(
@@ -98,6 +99,39 @@ fun SettingsScreen(
                 selected = locationPreferenceSpecific,
                 onSelect = { locationPreferenceSpecific = true }
             )
+        }
+    }
+    if (showWeatherAlertsDialog) {
+        PopupDialog(onDismissRequest = { showWeatherAlertsDialog = false }) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Weather alerts", modifier = Modifier.weight(1f))
+                Switch(
+                    checked = settings.weatherAlerts,
+                    onCheckedChange = { viewModel.setWeatherAlerts(it) }
+                )
+            }
+        }
+    }
+    if (showLocationPreferenceFieldDialog) {
+        PopupDialog(onDismissRequest = { showLocationPreferenceFieldDialog = false }) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    state = rememberTextFieldState(),
+                    label = { Text("Location Preference") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
+            }
         }
     }
 
@@ -138,58 +172,42 @@ fun SettingsScreen(
                         onClick = { showUpdateIntervalDialog = true }
                     ),
                     SettingsItem(
-                        "Location Preferences",
-                        "Use Current/Specify Location",
-                        Icons.Default.Place,
-                        onClick = { showLocationPreferenceDialog = true }
+                        "Weather Alerts",
+                        "Enable/Disable Alerts",
+                        Icons.Default.Notifications,
+                        composable = {
+                            Switch(
+                                checked = settings.weatherAlerts,
+                                onCheckedChange = { viewModel.setWeatherAlerts(it) }
+                            )
+                        }
                     )
                 )
             )
 
-            Spacer(modifier = Modifier.height(150.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
-            HorizontalDivider()
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Weather alerts", modifier = Modifier.weight(1f))
-                Switch(
-                    checked = settings.weatherAlerts,
-                    onCheckedChange = { viewModel.setWeatherAlerts(it) }
+            SettingsGroupCard(
+                items = listOf(
+                    SettingsItem(
+                        "Location Preferences",
+                        "Use Current/Specify Location",
+                        Icons.Default.Place,
+                        onClick = { showLocationPreferenceDialog = true }
+                    ),
+                    SettingsItem(
+                        "Specify Location...",
+                        "Custom Location Field",
+                        Icons.Default.Notifications,
+                        isActive = locationPreferenceSpecific,
+                        onClick = {showLocationPreferenceFieldDialog = true}
+                    )
                 )
-            }
-
-
-            HorizontalDivider()
-            OutlinedTextField(
-                state = rememberTextFieldState(),
-                label = { Text("Location Preference") },
-                enabled = locationPreferenceSpecific,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.CenterHorizontally)
             )
 
         }
     }
 }
-//
-//@Composable
-//private fun Section(title: String, content: @Composable () -> Unit) {
-//    Column {
-//        Text(
-//            text = title,
-//            style = MaterialTheme.typography.titleSmall,
-//            color = MaterialTheme.colorScheme.primary,
-//            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-//        )
-//        content()
-//    }
-//}
 
 @Composable
 private fun RadioRow(label: String, selected: Boolean, onSelect: () -> Unit) {

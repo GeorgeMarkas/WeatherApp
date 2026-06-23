@@ -2,6 +2,7 @@ package io.github.georgemarkas.weatherapp.ui.settings.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
@@ -24,7 +26,9 @@ data class SettingsItem(
     val title: String,
     val subtitle: String,
     val icon: ImageVector,
-    val onClick: () -> Unit
+    val isActive: Boolean = true,
+    val onClick: (() -> Unit)? = null,
+    val composable: (@Composable () -> Unit)? = null
 )
 
 @Composable
@@ -59,9 +63,14 @@ fun SettingsGroupCard(
 fun SettingsTile(item: SettingsItem) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { item.onClick() }
+            .then(
+                if (item.onClick != null) Modifier.clickable(enabled = item.isActive )
+                { item.onClick() } else Modifier
+            )
+            .alpha(if (item.isActive) 1f else 0.38f)
             .padding(16.dp)
     ) {
         Icon(
@@ -73,6 +82,11 @@ fun SettingsTile(item: SettingsItem) {
             Text(text = item.title, style = MaterialTheme.typography.bodyLarge)
             Text(text = item.subtitle, style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Column{
+            item.composable?.invoke()
         }
     }
 }
