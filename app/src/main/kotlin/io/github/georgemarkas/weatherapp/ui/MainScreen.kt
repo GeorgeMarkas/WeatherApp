@@ -23,13 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import io.github.georgemarkas.weatherapp.R
 import io.github.georgemarkas.weatherapp.ui.settings.SettingsScreen
+import io.github.georgemarkas.weatherapp.ui.settings.SettingsViewModel
 import io.github.georgemarkas.weatherapp.ui.weather.WeatherLayout
 import io.github.georgemarkas.weatherapp.ui.weather.WeatherViewModel
 
 @Composable
 fun WeatherScreen(
     modifier: Modifier = Modifier,
-    viewModel: WeatherViewModel = hiltViewModel()
+    weatherViewModel: WeatherViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     var showSettings by rememberSaveable { mutableStateOf(false) }
 
@@ -57,10 +59,10 @@ fun WeatherScreen(
         label = "weather_settings_transition",
     ) { settingsVisible ->
         if (settingsVisible) {
-            SettingsScreen(onBack = { showSettings = false }, viewModel = viewModel)
+            SettingsScreen(onBack = { showSettings = false }, viewModel = settingsViewModel)
         } else {
             Box(modifier = modifier.fillMaxSize()) {
-                WeatherLayout(viewModel = viewModel)
+                WeatherLayout(viewModel = weatherViewModel)
 
                 IconButton(
                     onClick = { showSettings = true },

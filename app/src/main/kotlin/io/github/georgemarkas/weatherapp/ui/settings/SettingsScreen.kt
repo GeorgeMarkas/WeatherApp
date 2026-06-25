@@ -9,18 +9,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -40,16 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.settings.models.UpdateInterval
+import io.github.georgemarkas.weatherapp.ui.settings.composables.LocationSearchBar
 import io.github.georgemarkas.weatherapp.ui.settings.composables.PopupDialog
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsGroupCard
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsItem
-import io.github.georgemarkas.weatherapp.ui.weather.WeatherViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
-    viewModel: WeatherViewModel,
+    viewModel: SettingsViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val settings = uiState.settings
@@ -92,12 +90,12 @@ fun SettingsScreen(
             RadioRow(
                 label = "Use Current Location",
                 selected = !locationPreferenceSpecific,
-                onSelect = { locationPreferenceSpecific = false }
+                onSelect = { viewModel.setSpecificLocationEnabled(false) }
             )
             RadioRow(
                 label = "Use Specified Location",
                 selected = locationPreferenceSpecific,
-                onSelect = { locationPreferenceSpecific = true }
+                onSelect = { viewModel.setSpecificLocationEnabled(true) }
             )
         }
     }
@@ -125,11 +123,10 @@ fun SettingsScreen(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    state = rememberTextFieldState(),
-                    label = { Text("Location Preference") },
-                    modifier = Modifier
-                        .padding(16.dp)
+
+                LocationSearchBar(
+                    viewModel,
+                    uiState
                 )
             }
         }
@@ -196,9 +193,15 @@ fun SettingsScreen(
                         onClick = { showLocationPreferenceDialog = true }
                     ),
                     SettingsItem(
-                        "Specify Location...",
+                        if (uiState.specifiedLocality == null) {
+                            "Specify Location..."
+                        } else {
+                            "${uiState.specifiedLocality}, " +
+                                    "${uiState.specifiedAdmin1}, " +
+                                    uiState.specifiedCountryCode
+                        },
                         "Custom Location Field",
-                        Icons.Default.Notifications,
+                        Icons.Default.Edit,
                         isActive = locationPreferenceSpecific,
                         onClick = {showLocationPreferenceFieldDialog = true}
                     )

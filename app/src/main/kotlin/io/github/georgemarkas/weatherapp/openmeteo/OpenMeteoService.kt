@@ -19,14 +19,14 @@ class OpenMeteoService @Inject constructor(
     converterFactory: Converter.Factory
 ) {
     private val forecastApiImpl: OpenMeteoForecastApi = Retrofit.Builder()
-        .baseUrl(OPEN_METEO_API_URL)
+        .baseUrl(OPEN_METEO_FORECAST_API_URL)
         .client(client)
         .addConverterFactory(converterFactory)
         .build()
         .create(OpenMeteoForecastApi::class.java)
 
     private val geocodingApiImpl: OpenMeteoGeocodingApi = Retrofit.Builder()
-        .baseUrl(OPEN_METEO_API_URL)
+        .baseUrl(OPEN_METEO_GEOCODING_API_URL)
         .client(client)
         .addConverterFactory(converterFactory)
         .build()
@@ -67,7 +67,8 @@ class OpenMeteoService @Inject constructor(
             .joinToString(",")
 
     companion object {
-        private const val OPEN_METEO_API_URL = "https://api.open-meteo.com/"
+        private const val OPEN_METEO_FORECAST_API_URL = "https://api.open-meteo.com/"
+        private const val OPEN_METEO_GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/"
 
         /**
          * Returns the description text for the given WMO 4677 weather code.

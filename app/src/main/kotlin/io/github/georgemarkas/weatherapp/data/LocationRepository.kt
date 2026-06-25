@@ -34,6 +34,9 @@ class LocationRepository @Inject constructor(
         val SPECIFIED_LONGITUDE = doublePreferencesKey("specified_longitude")
         val SPECIFIED_LOCALITY =  stringPreferencesKey("specified_locality")
 
+        val COUNTRY_CODE = stringPreferencesKey("country_code")
+        val ADMIN1 = stringPreferencesKey("admin1")
+
         private const val GEOCODER_ERROR_LOCALITY_PLACEHOLDER = "Rivendell"
     }
 
@@ -42,8 +45,10 @@ class LocationRepository @Inject constructor(
             val latitude = preferences[CURRENT_LATITUDE] ?: return@map null
             val longitude = preferences[CURRENT_LONGITUDE] ?: return@map null
             val locality = preferences[CURRENT_LOCALITY] ?: return@map null
+            val countryCode = preferences[COUNTRY_CODE] ?: return@map null
+            val admin1 = preferences[ADMIN1] ?: return@map null
 
-            LocationWrapper(latitude, longitude, locality)
+            LocationWrapper(latitude, longitude, locality, countryCode, admin1)
         }
 
     val specifiedLocationFlow: Flow<LocationWrapper?> =
@@ -51,8 +56,10 @@ class LocationRepository @Inject constructor(
             val latitude = preferences[SPECIFIED_LATITUDE] ?: return@map null
             val longitude = preferences[SPECIFIED_LONGITUDE] ?: return@map null
             val locality = preferences[SPECIFIED_LOCALITY] ?: return@map null
+            val countryCode = preferences[COUNTRY_CODE] ?: return@map null
+            val admin1 = preferences[ADMIN1] ?: return@map null
 
-            LocationWrapper(latitude, longitude, locality)
+            LocationWrapper(latitude, longitude, locality, countryCode, admin1)
         }
 
     /**
@@ -69,7 +76,7 @@ class LocationRepository @Inject constructor(
 
         val locality = geocodingService.getLocality(coords.latitude, coords.longitude)
 
-        storeCurrentLocation(LocationWrapper(coords.latitude, coords.longitude, locality))
+        storeCurrentLocation(LocationWrapper(coords.latitude, coords.longitude, locality, null, null))
         Timber.i("Updated current location")
     }
 
@@ -89,6 +96,8 @@ class LocationRepository @Inject constructor(
                 Timber.e("Geocoder failed to supply the locality name")
                 GEOCODER_ERROR_LOCALITY_PLACEHOLDER
             }
+            preferences[COUNTRY_CODE] = location.countryCode?: ""
+            preferences[ADMIN1] = location.admin1?: ""
             Timber.d("Stored current location in DataStore")
         }
     }
@@ -98,6 +107,8 @@ class LocationRepository @Inject constructor(
             preferences[SPECIFIED_LATITUDE] = location.latitude
             preferences[SPECIFIED_LONGITUDE] = location.longitude
             preferences[SPECIFIED_LOCALITY] = location.locality!!
+            preferences[COUNTRY_CODE] = location.countryCode!!
+            preferences[ADMIN1] = location.admin1!!
             Timber.d("Stored specified location in DataStore")
         }
     }

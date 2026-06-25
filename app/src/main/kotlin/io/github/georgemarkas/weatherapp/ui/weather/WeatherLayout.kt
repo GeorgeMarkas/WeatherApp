@@ -121,7 +121,11 @@ fun WeatherLayout(
 
                 uiState.weather != null -> {
                     Text(
-                        text = "${uiState.locality}",
+                        text = if (uiState.settings.specificLocation) {
+                            "${uiState.specifiedLocality}"
+                        } else {
+                            "${uiState.currentLocality}"
+                        },
                         style =  MaterialTheme.typography.displayMedium
                     )
                     Spacer(Modifier.height(10.dp))
