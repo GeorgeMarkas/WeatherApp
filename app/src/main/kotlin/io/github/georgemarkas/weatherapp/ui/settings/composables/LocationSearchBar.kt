@@ -79,38 +79,29 @@ fun LocationSearchBar(
                 .heightIn(max = 200.dp)
                 .exposedDropdownSize()
         ) {
-
-            if (suggestions.isNullOrEmpty()) {
+            suggestions?.forEach { suggestion ->
                 DropdownMenuItem(
-                    text = { Text("No results") },
-                    onClick = {},
-                    enabled = false
-                )
-            } else {
-                suggestions.forEach { suggestion ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                listOfNotNull(
-                                    suggestion.countryCode,
-                                    suggestion.name,
-                                    suggestion.admin1
-                                )
-                                    .filter { it.isNotBlank() }
-                                    .joinToString(", ")
+                    text = {
+                        Text(
+                            listOfNotNull(
+                                suggestion.countryCode,
+                                suggestion.name,
+                                suggestion.admin1
                             )
-                        },
-                        onClick = {
-                            settingsViewModel.extractAndSetChoice(suggestion)
-                            query = suggestion.name ?: run {
-                                Timber.e("Suggestion name is null")
-                                "null"
-                            }
-                            expanded = false
-                            settingsViewModel.clearSearchResults()
+                                .filter { it.isNotBlank() }
+                                .joinToString(", ")
+                        )
+                    },
+                    onClick = {
+                        settingsViewModel.extractAndSetChoice(suggestion)
+                        query = suggestion.name ?: run {
+                            Timber.e("Suggestion name is null")
+                            "null"
                         }
-                    )
-                }
+                        expanded = false
+                        settingsViewModel.clearSearchResults()
+                    }
+                )
             }
         }
     }
