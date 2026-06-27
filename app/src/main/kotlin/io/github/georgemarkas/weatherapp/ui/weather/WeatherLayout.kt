@@ -160,7 +160,7 @@ fun WeatherLayout(
                     Spacer(Modifier.height(8.dp))
 
                     var temperatureMin = uiState.weather!!.daily?.temperatureMin?.get(0)
-                    var temperatureMax = uiState.weather!!.daily?.temperatureMin?.get(0)
+                    var temperatureMax = uiState.weather!!.daily?.temperatureMax?.get(0)
                     if (uiState.settings.units == Units.IMPERIAL) {
                         temperatureMin = celsiusToFahrenheit(temperatureMin!!)
                         temperatureMax = celsiusToFahrenheit(temperatureMax!!)

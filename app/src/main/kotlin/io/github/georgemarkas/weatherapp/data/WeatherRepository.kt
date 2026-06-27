@@ -72,7 +72,7 @@ class WeatherRepository @Inject constructor(
     /**
      * Fetches fresh weather data for the given location and saves it.
      */
-    suspend fun specifiedLocationWeatherUpdate(location: LocationWrapper) {
+    suspend fun specifiedLocationWeatherUpdate(location: LocationWrapper?) {
         updateWeather(location)
     }
 

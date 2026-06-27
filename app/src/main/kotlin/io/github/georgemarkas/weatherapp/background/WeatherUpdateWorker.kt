@@ -16,6 +16,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit
 class WeatherUpdateWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted params: WorkerParameters,
+    private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository,
     private val notifier: WeatherUpdateNotifier
@@ -51,8 +53,13 @@ class WeatherUpdateWorker @AssistedInject constructor(
 
         return withContext(Dispatchers.IO) {
             try {
-                // TODO: Use the user-specified location should it be chosen from settings
-                weatherRepository.currentLocationWeatherUpdate()
+                val specifiedLocationSet = settingsRepository.settingsFlow.first().specifiedLocation
+                if (specifiedLocationSet) {
+                    weatherRepository.currentLocationWeatherUpdate()
+                } else {
+                    val location = locationRepository.specifiedLocationFlow.first()
+                    weatherRepository.specifiedLocationWeatherUpdate(location)
+                }
 
                 val alertsEnabled = settingsRepository.settingsFlow.first().weatherAlerts
                 if (alertsEnabled) {

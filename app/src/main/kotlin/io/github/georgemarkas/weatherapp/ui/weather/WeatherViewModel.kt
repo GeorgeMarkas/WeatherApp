@@ -60,21 +60,15 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch {
             isRefreshing.value = true
 
-            val preferenceSpecific = settingsRepository.settingsFlow.first().specifiedLocation
             try {
                 if (context.isOnline()) {
-                    // TODO: Use the user-specified location should it be chosen from settings
-                    //  (Done but ugly)
-                    if (preferenceSpecific) {
+                    val specifiedLocationSet = settingsRepository.settingsFlow.first().specifiedLocation
+                    if (specifiedLocationSet) {
                         val location = locationRepository.specifiedLocationFlow.first()
-                        if (location != null) {
-                            weatherRepository.specifiedLocationWeatherUpdate(location)
-                        } else {
-                            Timber.w("Specification enabled, but no location set. Falling back to current location")
-                            weatherRepository.currentLocationWeatherUpdate()
-                        }
-                    }else
+                        weatherRepository.specifiedLocationWeatherUpdate(location)
+                    } else {
                         weatherRepository.currentLocationWeatherUpdate()
+                    }
                 } else {
                     Timber.d("Can not refresh while offline")
                     Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()
