@@ -14,7 +14,7 @@ class WeatherUpdateNotifier @Inject constructor(
     val progressNotificationBuilder by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_BACKGROUND)
             .setContentTitle(context.getString(R.string.app_name))
-            .setSmallIcon(R.drawable.ic_notify_sync)
+            .setSmallIcon(R.drawable.sync_24px)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setProgress(0, 0, true)

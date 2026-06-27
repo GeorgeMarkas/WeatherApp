@@ -10,12 +10,11 @@ import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
-import io.github.georgemarkas.weatherapp.settings.models.Units
-import io.github.georgemarkas.weatherapp.settings.models.UpdateInterval
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -23,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    locationRepository: LocationRepository,
+    private val locationRepository: LocationRepository,
     private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -32,13 +31,15 @@ class WeatherViewModel @Inject constructor(
 
     val uiState: StateFlow<WeatherUiState> =
         combine(
+            locationRepository.specifiedLocationFlow,
             locationRepository.currentLocationFlow,
             weatherRepository.weatherFlow,
             settingsRepository.settingsFlow,
             isRefreshing
-        ) { locality, weather, settings, isRefreshing ->
+        ) { specLocality, locality, weather, settings, isRefreshing ->
             WeatherUiState(
-                locality = locality?.locality,
+                specifiedLocality = specLocality?.locality,
+                currentLocality = locality?.locality,
                 weather = weather,
                 settings = settings,
                 isRefreshing = isRefreshing
@@ -55,28 +56,25 @@ class WeatherViewModel @Inject constructor(
         WeatherUpdateWorker.start(context)
     }
 
-    fun setUpdateInterval(interval: UpdateInterval, context: Context) {
-        viewModelScope.launch {
-            settingsRepository.setUpdateInterval(interval)
-            WeatherUpdateWorker.scheduleJob(context, settingsRepository)
-        }
-    }
-
-    fun setUnits(units: Units) {
-        viewModelScope.launch { settingsRepository.setUnits(units) }
-    }
-
-    fun setWeatherAlerts(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setWeatherAlerts(enabled) }
-    }
-
     fun refresh(context: Context) {
         viewModelScope.launch {
             isRefreshing.value = true
+
+            val preferenceSpecific = settingsRepository.settingsFlow.first().specifiedLocation
             try {
                 if (context.isOnline()) {
                     // TODO: Use the user-specified location should it be chosen from settings
-                    weatherRepository.currentLocationWeatherUpdate()
+                    //  (Done but ugly)
+                    if (preferenceSpecific) {
+                        val location = locationRepository.specifiedLocationFlow.first()
+                        if (location != null) {
+                            weatherRepository.specifiedLocationWeatherUpdate(location)
+                        } else {
+                            Timber.w("Specification enabled, but no location set. Falling back to current location")
+                            weatherRepository.currentLocationWeatherUpdate()
+                        }
+                    }else
+                        weatherRepository.currentLocationWeatherUpdate()
                 } else {
                     Timber.d("Can not refresh while offline")
                     Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()

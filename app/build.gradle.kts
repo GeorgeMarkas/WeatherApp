@@ -30,10 +30,6 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
         }
 
         debug {
@@ -107,8 +103,6 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.core)
 
-    // Material icons
-    implementation(libs.androidx.compose.material.icons.core)
-
+    // Material
     implementation(libs.material)
 }
