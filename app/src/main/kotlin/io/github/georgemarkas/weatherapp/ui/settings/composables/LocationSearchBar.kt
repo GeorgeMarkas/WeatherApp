@@ -90,6 +90,7 @@ fun LocationSearchBar(
                                 "null"
                             }
                             expanded = false
+                            settingsViewModel.clearSearchResults()
                         }
                     )
                 }

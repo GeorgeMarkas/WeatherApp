@@ -81,6 +81,10 @@ class SettingsViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    fun clearSearchResults() {
+        searchResults.value = emptyList()
+    }
+
     fun updateGeolocationResults(query: String) {
         searchQuery.value = query
         if (query.isBlank()) searchResults.value = emptyList()
