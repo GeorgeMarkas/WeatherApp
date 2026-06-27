@@ -81,12 +81,20 @@ fun LocationSearchBar(
                 suggestions.forEach { suggestion ->
                     DropdownMenuItem(
                         text = {
-                            Text("${suggestion.name}, ${suggestion.admin1}, ${suggestion.countryCode}")
+                            Text(
+                                listOfNotNull(
+                                    suggestion.countryCode,
+                                    suggestion.name,
+                                    suggestion.admin1
+                                )
+                                    .filter { it.isNotBlank() }
+                                    .joinToString(", ")
+                            )
                         },
                         onClick = {
                             settingsViewModel.extractAndSetChoice(suggestion)
                             query = suggestion.name ?: run {
-                                Timber.e("Suggestion name annulled")
+                                Timber.e("Suggestion name is null")
                                 "null"
                             }
                             expanded = false

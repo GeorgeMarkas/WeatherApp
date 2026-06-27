@@ -5,5 +5,6 @@ data class LocationWrapper(
     val longitude: Double,
     val locality: String?,
     val countryCode: String?,
-    val admin1: String?
+    val admin1: String?,
+    val admin4: String?
 )

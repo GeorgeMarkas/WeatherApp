@@ -201,9 +201,13 @@ fun SettingsScreen(
                         if (uiState.specifiedLocality == null) {
                             "No location specified"
                         } else {
-                            "${uiState.specifiedLocality}, " +
-                                    "${uiState.admin1}, " +
-                                    uiState.countryCode
+                            listOfNotNull(
+                                uiState.countryCode,
+                                uiState.specifiedLocality,
+                                uiState.admin1
+                            )
+                                .filter { it.isNotBlank() }
+                                .joinToString(", ")
                         },
                         null,
                         Icons.Default.Edit,

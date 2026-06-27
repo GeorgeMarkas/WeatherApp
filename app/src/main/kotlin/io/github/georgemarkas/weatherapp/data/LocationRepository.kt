@@ -36,11 +36,12 @@ class LocationRepository @Inject constructor(
 
         val SPECIFIED_LATITUDE = doublePreferencesKey("specified_latitude")
         val SPECIFIED_LONGITUDE = doublePreferencesKey("specified_longitude")
-        val SPECIFIED_LOCALITY = stringPreferencesKey("specified_locality")
+        val SPECIFIED_LOCALITY = stringPreferencesKey("specified_locality") // This is Admin3
 
         // These are only applicable to specified location
         val COUNTRY_CODE = stringPreferencesKey("country_code")
         val ADMIN1 = stringPreferencesKey("admin1")
+        val ADMIN4 = stringPreferencesKey("admin4")
 
         private const val GEOCODER_ERROR_LOCALITY_PLACEHOLDER = "Rivendell"
     }
@@ -56,6 +57,7 @@ class LocationRepository @Inject constructor(
                 longitude,
                 locality,
                 null,
+                null,
                 null
             )
         }
@@ -67,13 +69,15 @@ class LocationRepository @Inject constructor(
             val locality = preferences[SPECIFIED_LOCALITY] ?: return@map null
             val countryCode = preferences[COUNTRY_CODE] ?: return@map null
             val admin1 = preferences[ADMIN1] ?: return@map null
+            val admin4 = preferences[ADMIN4] ?: return@map null
 
             LocationWrapper(
                 latitude,
                 longitude,
                 locality,
                 countryCode,
-                admin1
+                admin1,
+                admin4
             )
         }
 
@@ -96,6 +100,7 @@ class LocationRepository @Inject constructor(
                 coords.latitude,
                 coords.longitude,
                 locality,
+                null,
                 null,
                 null
             )
@@ -148,7 +153,7 @@ class LocationRepository @Inject constructor(
             preferences[SPECIFIED_LONGITUDE] = location.longitude
             preferences[SPECIFIED_LOCALITY] = location.locality ?: run {
                 Timber.d("Locality is null")
-                ""
+                GEOCODER_ERROR_LOCALITY_PLACEHOLDER
             }
             preferences[COUNTRY_CODE] = location.countryCode ?: run {
                 Timber.d("Country code is null")
@@ -156,6 +161,10 @@ class LocationRepository @Inject constructor(
             }
             preferences[ADMIN1] = location.admin1 ?: run {
                 Timber.d("Admin1 is null")
+                ""
+            }
+            preferences[ADMIN4] = location.admin4 ?: run {
+                Timber.d("Admin4 is null")
                 ""
             }
             Timber.d("Stored specified location in DataStore")

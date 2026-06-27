@@ -10,5 +10,6 @@ data class GeocodingResult(
     @SerialName("longitude") val longitude: Double? = null,
     @SerialName("country_code") val countryCode: String? = null,
     @SerialName("admin1") val admin1: String? = null,
-    @SerialName("admin3") val admin3: String? = null
+    @SerialName("admin3") val admin3: String? = null,
+    @SerialName("admin4") val admin4: String? = null
 )

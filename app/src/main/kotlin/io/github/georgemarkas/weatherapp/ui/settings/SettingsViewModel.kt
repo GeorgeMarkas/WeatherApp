@@ -97,7 +97,8 @@ class SettingsViewModel @Inject constructor(
                 choice.longitude!!,
                 choice.admin3,
                 choice.countryCode,
-                choice.admin1
+                choice.admin1,
+                choice.admin4
             )
 
             locationRepository.updateSpecifiedLocation(location)
