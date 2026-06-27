@@ -9,6 +9,7 @@ data class WeatherCurrent(
     @SerialName("weather_code") val weatherCode: Int?,
     @SerialName("relative_humidity_2m") val relativeHumidity: Int?,
     @SerialName("wind_speed_10m") val windSpeed: Double?,
+//    @SerialName("wind_direction_10m") val windDirection: List<Double?>?,
     @SerialName("cloud_cover") val cloudCover: Int?,
     val time: Long,
 )

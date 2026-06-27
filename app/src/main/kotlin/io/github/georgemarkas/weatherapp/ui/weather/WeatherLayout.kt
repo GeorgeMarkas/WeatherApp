@@ -36,6 +36,11 @@ import io.github.georgemarkas.weatherapp.extensions.hasPermission
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.util.celsiusToFahrenheit
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
+import io.github.georgemarkas.weatherapp.ui.weather.component.DailyForecastRowConditions
+import io.github.georgemarkas.weatherapp.ui.weather.component.ForecastBox
+import io.github.georgemarkas.weatherapp.ui.weather.component.ForecastTab
+import io.github.georgemarkas.weatherapp.ui.weather.component.HourlyForecastRowConditions
+import io.github.georgemarkas.weatherapp.ui.weather.component.HourlyForecastRowWind
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -129,12 +134,12 @@ fun WeatherLayout(
 
                     val temperatureUnit = uiState.settings.units.temperature
 
-                    var temperature = uiState.weather?.current?.temperature!!
-                    if (uiState.settings.units == Units.IMPERIAL)
+                    var temperature = uiState.weather?.current?.temperature
+                    if (uiState.settings.units == Units.IMPERIAL && temperature != null)
                         temperature = celsiusToFahrenheit(temperature)
 
                     Text(
-                        text = "$temperature${temperatureUnit}",
+                        text = temperature?.let { "%.1f${temperatureUnit}".format(it) } ?: "—",
                         style = MaterialTheme.typography.displayLarge,
                     )
 
@@ -169,6 +174,55 @@ fun WeatherLayout(
                         text = "Last updated at $lastUpdatedAt",
                         style = MaterialTheme.typography.bodyLarge
                     )
+
+                    val daily = uiState.weather?.daily
+                    if (daily != null) {
+                        Spacer(Modifier.height(32.dp))
+                        ForecastBox(
+                            title = "Daily forecast",
+                            tabs = listOf(
+                                ForecastTab("Conditions") {
+                                    DailyForecastRowConditions(daily, uiState.settings.units)
+                                },
+                                ForecastTab("Wind") {
+
+                                }
+                            )
+                        )
+                    } else {
+                        Text(
+                            text = "No Daily Forecast available - Something went wrong.",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    val hourly = uiState.weather?.hourly
+                    if (hourly != null) {
+                        ForecastBox(
+                            title = "Hourly forecast",
+                            tabs = listOf(
+                                ForecastTab("Conditions") {
+                                    HourlyForecastRowConditions(
+                                        hourly,
+                                        uiState.settings.units,
+                                    )
+                                },
+                                ForecastTab("Wind") {
+                                    HourlyForecastRowWind(
+                                        hourly,
+                                        uiState.settings.units,
+                                    )
+                                }
+                            )
+                        )
+                    } else {
+                        Text(
+                            text = "No Hourly Forecast available - Something went wrong.",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
 
                 else -> {
@@ -180,6 +234,7 @@ fun WeatherLayout(
 
                 // TODO: Handle erroneous states / lack of permissions somehow
             }
+
         }
     }
 }
