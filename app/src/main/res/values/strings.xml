@@ -85,6 +85,7 @@
     <string name="setting_location_source_description">Device location, custom location</string>
     <string name="setting_location_source_popup_current">Use device location</string>
     <string name="setting_location_source_popup_custom">Use custom location</string>
+    <string name="setting_location_source_error_toast">You must specify a location or switch back to device location</string>
 
     <string name="location_search_label">Location preference</string>
     <string name="location_search_placeholder">Search…</string>
