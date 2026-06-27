@@ -109,4 +109,6 @@ dependencies {
 
     // Material icons
     implementation(libs.androidx.compose.material.icons.core)
+
+    implementation(libs.material)
 }

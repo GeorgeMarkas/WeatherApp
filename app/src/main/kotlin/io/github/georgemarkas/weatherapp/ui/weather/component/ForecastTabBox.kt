@@ -21,7 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import io.github.georgemarkas.weatherapp.ui.theme.dimens
 
 @Composable
 fun ForecastRow(
@@ -32,8 +32,8 @@ fun ForecastRow(
     LazyRow(
         modifier = modifier,
         state = listState,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.forecastRowContentsHArrangement),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.dimens.forecastRowContentsHPadding),
         content = content
     )
 }
@@ -49,24 +49,26 @@ fun ForecastBox(
     title: String
 ) {
 
-    // TODO: REPLACE MANUAL DP VALUES
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+            .padding(MaterialTheme.dimens.forecastBoxBordersHorizontal)
     ) {
-        // TODO: REPLACE MANUAL DP VALUES
-        Column(modifier = Modifier.padding(bottom = 8.dp)) {
+        Column(modifier = Modifier.padding(MaterialTheme.dimens.forecastBoxColumnPadding)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp)
+                modifier = Modifier.padding(
+                    start = MaterialTheme.dimens.spacing4,
+                    top = MaterialTheme.dimens.spacing3,
+                    bottom = MaterialTheme.dimens.spacing1)
             )
-            // TODO: REPLACE MANUAL DP VALUES
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 8.dp,)
+                    .padding(
+                        horizontal = MaterialTheme.dimens.spacing3,
+                        vertical = MaterialTheme.dimens.spacing2)
             ) {
                 tabs.forEachIndexed { index, tab ->
                     SegmentedButton(

@@ -14,10 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.unit.dp
 import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherDaily
 import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherHourly
 import io.github.georgemarkas.weatherapp.settings.models.Units
+import io.github.georgemarkas.weatherapp.ui.theme.dimens
 import io.github.georgemarkas.weatherapp.util.celsiusToFahrenheit
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -44,14 +44,13 @@ fun DailyForecastRowConditions(
 
     ForecastRow(
         listState = listState,
-        // TODO: REPLACE MANUAL DP
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(bottom = MaterialTheme.dimens.forecastRowBottomPadding)
     ) {
         items(daily.temperatureMax.size) { index ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                // TODO: REPLACE MANUAL DP
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement =
+                    Arrangement.spacedBy(MaterialTheme.dimens.forecastRowItemVerticalArrangement),
             ) {
 
                 val dayEEE = dayShortFormatter
@@ -126,14 +125,13 @@ fun DailyForecastRowWind(
 
     ForecastRow(
         listState = listState,
-        // TODO: REPLACE MANUAL DP
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(bottom = MaterialTheme.dimens.forecastRowBottomPadding)
     ) {
         items(daily.temperatureMax.size) { index ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                // TODO: REPLACE MANUAL DP
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement
+                    .spacedBy(MaterialTheme.dimens.forecastRowItemVerticalArrangement),
             ) {
 
                 val dayEEE = dayShortFormatter
@@ -202,15 +200,14 @@ fun HourlyForecastRowConditions(
 
     ForecastRow(
         listState = listState,
-        // TODO: REPLACE MANUAL DP
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(bottom = MaterialTheme.dimens.forecastRowBottomPadding)
     ) {
         items(temperatures.size) { index ->
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                // TODO: REPLACE MANUAL DP
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement
+                    .spacedBy(MaterialTheme.dimens.forecastRowItemVerticalArrangement),
             ) {
                 val time = hoursMinutesFormatter
                     .format(Date(hourly.time[index] * 1000))
@@ -223,8 +220,7 @@ fun HourlyForecastRowConditions(
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                // TODO: REPLACE WITH THEME DIMENSIONS
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
                 Text(
                     text = temperature?.let {
@@ -254,14 +250,13 @@ fun HourlyForecastRowWind(
     val listState = rememberLazyListState()
     ForecastRow(
         listState = listState,
-        // TODO: REPLACE MANUAL DP
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(bottom = MaterialTheme.dimens.forecastRowBottomPadding)
     ) {
         items(windSpeed.size) { index ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                // TODO: REPLACE MANUAL DP
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement
+                    .spacedBy(MaterialTheme.dimens.forecastRowItemVerticalArrangement),
             ) {
                 val time = hoursMinutesFormatter
                     .format(Date(hourly.time[index] * 1000))
@@ -276,8 +271,7 @@ fun HourlyForecastRowWind(
 //                    style = MaterialTheme.typography.bodySmall
 //                )
 
-                // TODO: REPLACE MANUAL DP
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
                 Text(
                     windSpeed[index]?.let { "${it}B" } ?: "—",
