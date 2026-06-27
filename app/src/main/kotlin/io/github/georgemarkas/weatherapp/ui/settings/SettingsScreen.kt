@@ -20,10 +20,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,6 +43,9 @@ import io.github.georgemarkas.weatherapp.ui.settings.composables.PopupDialog
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsGroupCard
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsItem
 import androidx.compose.ui.res.vectorResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Suppress("AssignedValueIsNeverRead")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +72,20 @@ fun SettingsScreen(
 
     LaunchedEffect(isLocationMissing) {
         if (!isLocationMissing) showLocationError = false
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val missingState = rememberUpdatedState(isLocationMissing)
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+
+            if (event == Lifecycle.Event.ON_STOP && missingState.value)
+                viewModel.setSpecificLocationEnabled(false)
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val locationRequiredMessage = stringResource(R.string.setting_location_source_error_toast)
