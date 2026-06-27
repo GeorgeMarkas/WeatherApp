@@ -48,8 +48,8 @@ fun LocationSearchBar(
                 settingsViewModel.updateGeolocationResults(query)
             },
             singleLine = true,
-            label = { stringResource(R.string.location_search_label) },
-            placeholder = { stringResource(R.string.location_search_placeholder) },
+            label = { Text(stringResource(R.string.location_search_label)) },
+            placeholder = { Text(stringResource(R.string.location_search_placeholder)) },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                 .fillMaxWidth(),
