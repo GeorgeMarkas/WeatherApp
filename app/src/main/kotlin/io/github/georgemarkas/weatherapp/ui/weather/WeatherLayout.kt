@@ -44,6 +44,7 @@ import io.github.georgemarkas.weatherapp.ui.weather.component.HourlyForecastRowC
 import io.github.georgemarkas.weatherapp.ui.weather.component.HourlyForecastRowWind
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.math.roundToInt
 
 @Composable
 fun WeatherLayout(
@@ -149,7 +150,7 @@ fun WeatherLayout(
                         temperature = celsiusToFahrenheit(temperature)
 
                     Text(
-                        text = temperature?.let { "%.1f${temperatureUnit}".format(it) } ?: "—",
+                        text = temperature?.let { "${it.roundToInt()}${temperatureUnit}" } ?: "—",
                         style = MaterialTheme.typography.displayLarge,
                     )
 
@@ -177,13 +178,6 @@ fun WeatherLayout(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    val lastUpdatedAt =
-                        SimpleDateFormat("HH:mm:ss", LocalLocale.current.platformLocale)
-                            .format(Date(uiState.weather!!.fetchedAt))
-                    Text(
-                        text = "Last updated at $lastUpdatedAt",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
 
                     val daily = uiState.weather?.daily
                     if (daily != null) {

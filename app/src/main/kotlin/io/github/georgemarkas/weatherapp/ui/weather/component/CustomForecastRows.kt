@@ -1,10 +1,12 @@
 package io.github.georgemarkas.weatherapp.ui.weather.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,14 +16,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import io.github.georgemarkas.weatherapp.R
 import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherDaily
 import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherHourly
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.ui.theme.dimens
 import io.github.georgemarkas.weatherapp.util.celsiusToFahrenheit
-import io.github.georgemarkas.weatherapp.util.degreesToDirection
+import io.github.georgemarkas.weatherapp.util.degreesToDirectionIcon
+import io.github.georgemarkas.weatherapp.util.kphToBeaufortDrawable
 import io.github.georgemarkas.weatherapp.util.kphToMph
+import io.github.georgemarkas.weatherapp.util.wmoCodeToDrawable
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.math.roundToInt
@@ -40,7 +46,7 @@ fun DailyForecastRowConditions(
 
     val locale = LocalLocale.current.platformLocale
     val dayShortFormatter = remember(locale) {
-        SimpleDateFormat("EEE", locale)
+        SimpleDateFormat("dd/MM", locale)
     }
     val dayMonthFormatter = remember(locale) {
         SimpleDateFormat("dd-MM", locale)
@@ -74,9 +80,13 @@ fun DailyForecastRowConditions(
                     style = MaterialTheme.typography.bodySmall
                 )
 
-                Text(
-                    text = "${daily.weatherCode?.get(index)}WC",
-                    style = MaterialTheme.typography.bodyLarge
+                Image(
+                    painter = painterResource(
+                        daily.weatherCode?.get(index)?.let { wmoCodeToDrawable(it) }
+                            ?: R.drawable.ic_overcast
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.iconSizeMedium)
                 )
 
                 val tempMax = temperatureMax[index]
@@ -99,7 +109,6 @@ fun DailyForecastRowConditions(
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodySmall
                 )
-
 
                 Text(
                     text = tempMin?.let {
@@ -160,19 +169,29 @@ fun DailyForecastRowWind(
                     style = MaterialTheme.typography.bodySmall
                 )
 
-                Text(
-                    text = windDirectionDominant[index]?.let { degreesToDirection(it) } ?: "—",
-                    style = MaterialTheme.typography.bodyLarge
+                Image(
+                    painter = painterResource(
+                        windDirectionDominant[index]?.let { degreesToDirectionIcon(it) }
+                            ?: R.drawable.ic_compass
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.iconSizeMedium)
                 )
-
                 Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
                 val speedMax = windMax[index]
                     ?.let { if (unitType == Units.IMPERIAL) kphToMph(it) else it }
-
+                Image(
+                    painter = painterResource(
+                        speedMax?.let { kphToBeaufortDrawable(it) }
+                            ?: R.drawable.ic_wind_beaufort_0
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.iconSizeMedium)
+                )
                 Text(
                     text = speedMax?.let {
-                        "${kphToMph(it).roundToInt()}${windUnit}"
+                        "${speedMax.roundToInt()}${windUnit}"
                     } ?: "-",
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -220,11 +239,16 @@ fun HourlyForecastRowConditions(
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = "${hourly.weatherCode?.get(index)}WC",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyLarge
+
+                Image(
+                    painter = painterResource(
+                        hourly.weatherCode?.get(index)?.let { wmoCodeToDrawable(it) }
+                            ?: R.drawable.ic_overcast
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.iconSizeMedium)
                 )
+
 
                 Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
@@ -277,15 +301,28 @@ fun HourlyForecastRowWind(
                     fontWeight = FontWeight.Bold
                 )
 
-                Text(
-                    text = windDirection[index]?.let { degreesToDirection(it) } ?: "—",
-                    style = MaterialTheme.typography.bodyLarge
+                Image(
+                    painter = painterResource(
+                        windDirection[index]?.let { degreesToDirectionIcon(it) }
+                            ?: R.drawable.ic_compass
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.iconSizeMedium)
                 )
 
                 Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
                 val speedMax = windSpeed[index]
                     ?.let { if (unitType == Units.IMPERIAL) kphToMph(it) else it }
+
+                Image(
+                    painter = painterResource(
+                        speedMax?.let { kphToBeaufortDrawable(it) }
+                            ?: R.drawable.ic_wind_beaufort_0
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(MaterialTheme.dimens.iconSizeMedium)
+                )
 
                 Text(
                     speedMax?.let { "${it.roundToInt()}${unitType.windSpeed}" } ?: "—",
