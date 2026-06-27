@@ -44,6 +44,7 @@ import io.github.georgemarkas.weatherapp.ui.settings.composables.PopupDialog
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsGroupCard
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsItem
 
+@Suppress("AssignedValueIsNeverRead")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(

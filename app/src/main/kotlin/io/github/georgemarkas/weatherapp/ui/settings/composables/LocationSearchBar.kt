@@ -36,7 +36,10 @@ fun LocationSearchBar(
     val suggestions = uiState.searchResults
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = it }
+        onExpandedChange = {
+            @Suppress("AssignedValueIsNeverRead")
+            expanded = it
+        }
     ) {
         OutlinedTextField(
             value = query,
