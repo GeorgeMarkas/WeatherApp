@@ -52,8 +52,8 @@ class AlertsTest {
     ) = WeatherDaily(
         temperatureMax = temperatureMax,
         temperatureMin = temperatureMin,
-        relativeHumidityMean = null,
-        cloudCoverMean = null,
+        precipitationProbabilityMean = null,
+        weatherCode = null,
         time = time
     )
 

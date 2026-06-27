@@ -1,5 +1,6 @@
 package io.github.georgemarkas.weatherapp.ui.weather.component
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,9 +54,15 @@ fun ForecastBox(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(MaterialTheme.dimens.forecastBoxBordersHorizontal)
+            .padding(
+                horizontal = MaterialTheme.dimens.forecastBoxBordersHorizontal
+            )
     ) {
-        Column(modifier = Modifier.padding(MaterialTheme.dimens.forecastBoxColumnPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(MaterialTheme.dimens.forecastBoxColumnPadding)
+                .animateContentSize()
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,

@@ -36,7 +36,9 @@ import io.github.georgemarkas.weatherapp.extensions.hasPermission
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.util.celsiusToFahrenheit
 import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
+import io.github.georgemarkas.weatherapp.ui.theme.dimens
 import io.github.georgemarkas.weatherapp.ui.weather.component.DailyForecastRowConditions
+import io.github.georgemarkas.weatherapp.ui.weather.component.DailyForecastRowWind
 import io.github.georgemarkas.weatherapp.ui.weather.component.ForecastBox
 import io.github.georgemarkas.weatherapp.ui.weather.component.ForecastTab
 import io.github.georgemarkas.weatherapp.ui.weather.component.HourlyForecastRowConditions
@@ -185,7 +187,7 @@ fun WeatherLayout(
                                     DailyForecastRowConditions(daily, uiState.settings.units)
                                 },
                                 ForecastTab("Wind") {
-
+                                    DailyForecastRowWind(daily, uiState.settings.units)
                                 }
                             )
                         )
@@ -196,7 +198,9 @@ fun WeatherLayout(
                         )
                     }
 
-                    Spacer(Modifier.height(16.dp))
+
+                    Spacer(Modifier.height(MaterialTheme.dimens.spacing3))
+
 
                     val hourly = uiState.weather?.hourly
                     if (hourly != null) {

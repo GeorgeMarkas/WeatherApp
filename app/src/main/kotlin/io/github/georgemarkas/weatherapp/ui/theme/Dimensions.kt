@@ -17,7 +17,7 @@ data class Dimensions(
     val iconSizeMedium: Dp = 48.dp,
     val iconSizeLarge: Dp = 96.dp,
 
-    val forecastBoxColumnPadding: Dp = 8.dp,
+    val forecastBoxColumnPadding: Dp = 6.dp,
     val forecastBoxBordersHorizontal: Dp = 20.dp,
 
     val forecastRowContentsHPadding: Dp = 12.dp,

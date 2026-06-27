@@ -14,13 +14,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.text.font.FontWeight
 import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherDaily
 import io.github.georgemarkas.weatherapp.openmeteo.models.forecast.WeatherHourly
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.ui.theme.dimens
 import io.github.georgemarkas.weatherapp.util.celsiusToFahrenheit
+import io.github.georgemarkas.weatherapp.util.degreesToDirection
+import io.github.georgemarkas.weatherapp.util.kphToMph
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.math.roundToInt
 
 @Composable
 fun DailyForecastRowConditions(
@@ -46,7 +50,7 @@ fun DailyForecastRowConditions(
         listState = listState,
         modifier = Modifier.padding(bottom = MaterialTheme.dimens.forecastRowBottomPadding)
     ) {
-        items(daily.temperatureMax.size) { index ->
+        items(temperatureMax.size) { index ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement =
@@ -59,6 +63,7 @@ fun DailyForecastRowConditions(
                 Text(
                     text = "$dayEEE",
                     style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
                 )
 
                 val dayDM = dayMonthFormatter
@@ -70,28 +75,35 @@ fun DailyForecastRowConditions(
                 )
 
                 Text(
-                    text = "${daily.cloudCoverMean?.get(index)}CC",
+                    text = "${daily.weatherCode?.get(index)}WC",
                     style = MaterialTheme.typography.bodyLarge
                 )
 
+                val tempMax = temperatureMax[index]
+                    ?.let { if (unitType == Units.IMPERIAL) celsiusToFahrenheit(it) else it }
+
+                val tempMin = temperatureMin[index]
+                    ?.let { if (unitType == Units.IMPERIAL) celsiusToFahrenheit(it) else it }
+
                 Text(
-                    text = temperatureMax[index]?.let {
-                        "%.1f${temperatureUnit}"
-                            .format(it)
+                    text = tempMax?.let {
+                        "${it.roundToInt()}$temperatureUnit"
                     } ?: "-",
                     style = MaterialTheme.typography.bodyMedium
                 )
 
+                Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
+
                 Text(
-                    text = "${daily.relativeHumidityMean?.get(index)}RH%",
+                    text = "${daily.precipitationProbabilityMean?.get(index)}%",
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodySmall
                 )
 
+
                 Text(
-                    text = temperatureMin[index]?.let {
-                        "%.1f${temperatureUnit}"
-                            .format(it)
+                    text = tempMin?.let {
+                        "${it.roundToInt()}$temperatureUnit"
                     } ?: "-",
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -102,7 +114,6 @@ fun DailyForecastRowConditions(
 
 }
 
-// TODO: IMPLEMENT WIND SECTION
 @Composable
 fun DailyForecastRowWind(
     daily: WeatherDaily,
@@ -110,10 +121,9 @@ fun DailyForecastRowWind(
 ) {
     val listState = rememberLazyListState()
 
-    // TODO: RESOLVE SITUATION WITH WEATHER RESPONSE OBJECTS NOT SERIALIZING!
-    val temperatureMax = daily.temperatureMax ?: return // or show an empty/error state
-    val temperatureMin = daily.temperatureMin ?: return
-    val temperatureUnit = unitType.temperature
+    val windUnit = unitType.windSpeed
+    val windMax = daily.windSpeed ?: return
+    val windDirectionDominant = daily.windDirection ?: return
 
     val locale = LocalLocale.current.platformLocale
     val dayShortFormatter = remember(locale) {
@@ -127,7 +137,7 @@ fun DailyForecastRowWind(
         listState = listState,
         modifier = Modifier.padding(bottom = MaterialTheme.dimens.forecastRowBottomPadding)
     ) {
-        items(daily.temperatureMax.size) { index ->
+        items(windMax.size) { index ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement
@@ -150,32 +160,22 @@ fun DailyForecastRowWind(
                     style = MaterialTheme.typography.bodySmall
                 )
 
-//                Text(
-//                    text = "${daily.cloudCoverMean?.get(index)}CC",
-//                    style = MaterialTheme.typography.bodyLarge
-//                )
+                Text(
+                    text = windDirectionDominant[index]?.let { degreesToDirection(it) } ?: "—",
+                    style = MaterialTheme.typography.bodyLarge
+                )
 
-//                Text(
-//                    text = temperatureMax[index]?.let {
-//                        "%.1f${temperatureUnit}"
-//                            .format(it)
-//                    } ?: "-",
-//                    style = MaterialTheme.typography.bodyMedium
-//                )
+                Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
-//                Text(
-//                    text = "${daily.relativeHumidityMean?.get(index)}RH%",
-//                    color = Color.Gray,
-//                    style = MaterialTheme.typography.bodySmall
-//                )
+                val speedMax = windMax[index]
+                    ?.let { if (unitType == Units.IMPERIAL) kphToMph(it) else it }
 
-//                Text(
-//                    text = temperatureMin[index]?.let {
-//                        "%.1f${temperatureUnit}"
-//                            .format(it)
-//                    } ?: "-",
-//                    style = MaterialTheme.typography.bodyMedium
-//                )
+                Text(
+                    text = speedMax?.let {
+                        "${kphToMph(it).roundToInt()}${windUnit}"
+                    } ?: "-",
+                    style = MaterialTheme.typography.bodyMedium
+                )
 
             }
         }
@@ -195,7 +195,7 @@ fun HourlyForecastRowConditions(
 
     val locale = LocalLocale.current.platformLocale
     val hoursMinutesFormatter = remember(locale) {
-        SimpleDateFormat("HH:mm", locale)
+        SimpleDateFormat("H:mm", locale)
     }
 
     ForecastRow(
@@ -217,15 +217,25 @@ fun HourlyForecastRowConditions(
 
                 Text(
                     text = time,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${hourly.weatherCode?.get(index)}WC",
+                    color = Color.Gray,
                     style = MaterialTheme.typography.bodyLarge
                 )
 
                 Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
                 Text(
+                    text = "${hourly.precipitationProbability?.get(index)}%",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
                     text = temperature?.let {
-                        "%.1f${temperatureUnit}"
-                            .format(it)
+                        "${it.roundToInt()}${temperatureUnit}"
                     } ?: "—",
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -240,11 +250,11 @@ fun HourlyForecastRowWind(
     unitType: Units
 ) {
     val windSpeed = hourly.windSpeed ?: return
-//    val windDirection = hourly.windDirection ?: return
+    val windDirection = hourly.windDirection ?: return
 
     val locale = LocalLocale.current.platformLocale
     val hoursMinutesFormatter = remember(locale) {
-        SimpleDateFormat("HH:mm", locale)
+        SimpleDateFormat("H:mm", locale)
     }
 
     val listState = rememberLazyListState()
@@ -263,18 +273,22 @@ fun HourlyForecastRowWind(
 
                 Text(
                     text = time,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = windDirection[index]?.let { degreesToDirection(it) } ?: "—",
                     style = MaterialTheme.typography.bodyLarge
                 )
-//                Text(
-//                    windDirection[index]?.let { "${it}DIC"} ?: "—",
-//                    color = Color.Gray,
-//                    style = MaterialTheme.typography.bodySmall
-//                )
 
                 Spacer(Modifier.height(MaterialTheme.dimens.spacing4))
 
+                val speedMax = windSpeed[index]
+                    ?.let { if (unitType == Units.IMPERIAL) kphToMph(it) else it }
+
                 Text(
-                    windSpeed[index]?.let { "${it}B" } ?: "—",
+                    speedMax?.let { "${it.roundToInt()}${unitType.windSpeed}" } ?: "—",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
