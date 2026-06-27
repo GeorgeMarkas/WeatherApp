@@ -25,8 +25,9 @@ class AlertsTest {
         weatherCode = weatherCode,
         relativeHumidity = null,
         windSpeed = windSpeed,
+        windDirection = null,
         cloudCover = null,
-        time = time,
+        time = time
     )
 
     private fun hourly(
@@ -39,6 +40,7 @@ class AlertsTest {
         weatherCode = weatherCode,
         relativeHumidity = null,
         windSpeed = windSpeed,
+        windDirection = null,
         cloudCover = null,
         precipitationProbability = null,
         isDay = null,
@@ -54,6 +56,8 @@ class AlertsTest {
         temperatureMin = temperatureMin,
         precipitationProbabilityMean = null,
         weatherCode = null,
+        windSpeed = null,
+        windDirection = null,
         time = time
     )
 

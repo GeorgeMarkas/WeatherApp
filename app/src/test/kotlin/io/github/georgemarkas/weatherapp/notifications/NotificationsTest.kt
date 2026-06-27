@@ -40,6 +40,7 @@ class NotificationsTest {
             weatherCode = null,
             relativeHumidity = null,
             windSpeed = null,
+            windDirection = null,
             cloudCover = null,
             time = now()
         )
@@ -51,6 +52,7 @@ class NotificationsTest {
             weatherCode = 1,
             relativeHumidity = null,
             windSpeed = 5.0,
+            windDirection = null,
             cloudCover = null,
             time = now(),
         )
