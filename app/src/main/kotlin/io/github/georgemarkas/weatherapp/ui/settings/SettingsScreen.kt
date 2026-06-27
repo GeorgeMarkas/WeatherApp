@@ -1,5 +1,7 @@
 package io.github.georgemarkas.weatherapp.ui.settings
 
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,9 +20,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +43,9 @@ import io.github.georgemarkas.weatherapp.ui.settings.composables.PopupDialog
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsGroupCard
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsItem
 import androidx.compose.ui.res.vectorResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Suppress("AssignedValueIsNeverRead")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +67,43 @@ fun SettingsScreen(
     var showLocationPreferenceDialog by remember { mutableStateOf(false) }
     var showWeatherAlertsDialog by remember { mutableStateOf(false) }
     var showLocationPreferenceFieldDialog by remember { mutableStateOf(false) }
+    var showLocationError by rememberSaveable { mutableStateOf(false) }
+    val isLocationMissing = specifiedLocationToggle && uiState.specifiedLocality == null
+
+    LaunchedEffect(isLocationMissing) {
+        if (!isLocationMissing) showLocationError = false
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val missingState = rememberUpdatedState(isLocationMissing)
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+
+            if (event == Lifecycle.Event.ON_STOP && missingState.value)
+                viewModel.setSpecificLocationEnabled(false)
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    val locationRequiredMessage = stringResource(R.string.setting_location_source_error_toast)
+
+    fun attemptBack() {
+        if (isLocationMissing) {
+            showLocationError = true
+            Toast.makeText(
+                context,
+                locationRequiredMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            onBack()
+        }
+    }
+
+    BackHandler { attemptBack() }
 
     if (showUnitDialog) {
         PopupDialog(onDismissRequest = { showUnitDialog = false }) {
@@ -138,7 +183,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_header)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { attemptBack() }) {
                         Icon(
                             ImageVector.vectorResource(R.drawable.arrow_back_24px),
                             contentDescription = "Back"
@@ -208,6 +253,7 @@ fun SettingsScreen(
                         null,
                         ImageVector.vectorResource(R.drawable.edit_location_alt_24px),
                         isActive = specifiedLocationToggle,
+                        highlightError = showLocationError,
                         onClick = { showLocationPreferenceFieldDialog = true }
                     )
                 )

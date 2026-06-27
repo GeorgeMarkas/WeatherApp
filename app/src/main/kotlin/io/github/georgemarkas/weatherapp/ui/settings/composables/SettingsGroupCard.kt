@@ -1,6 +1,7 @@
 package io.github.georgemarkas.weatherapp.ui.settings.composables
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ data class SettingsItem(
     val subtitle: String?,
     val icon: ImageVector,
     val isActive: Boolean = true,
+    val highlightError: Boolean = false,
     val onClick: (() -> Unit)? = null,
     val composable: (@Composable () -> Unit)? = null
 )
@@ -47,7 +49,7 @@ fun SettingsGroupCard(
     ) {
         items.forEachIndexed { index, item ->
             SettingsTile(item = item)
-            if (index < items.size - 1) {
+            if (index < items.size - 1 && !items[index + 1].highlightError) {
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -66,6 +68,21 @@ fun SettingsTile(item: SettingsItem) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (item.highlightError) {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.error,
+                        shape = RoundedCornerShape(
+                            topStart = 0.dp,
+                            topEnd = 0.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 16.dp
+                        )
+                    )
+                } else
+                    Modifier
+            )
             .then(
                 if (item.onClick != null) Modifier.clickable(enabled = item.isActive)
                 { item.onClick() } else Modifier
