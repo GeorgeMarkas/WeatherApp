@@ -70,8 +70,11 @@ fun LocationSearchBar(
         )
 
         ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
+            expanded = expanded && !suggestions.isNullOrEmpty(),
+            onDismissRequest = {
+                expanded = false
+                settingsViewModel.clearSearchResults()
+            },
             modifier = Modifier
                 .heightIn(max = 200.dp)
                 .exposedDropdownSize()
