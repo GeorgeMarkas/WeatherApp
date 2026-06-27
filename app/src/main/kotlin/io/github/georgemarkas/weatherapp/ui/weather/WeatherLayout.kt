@@ -76,8 +76,13 @@ fun WeatherLayout(
 
     // TODO: This is most likely crap and needs to be redone
     LaunchedEffect(coarseLocationGranted) {
-        if (coarseLocationGranted && !WeatherUpdateWorker.isScheduled(context))
-            viewModel.scheduleInitialJob(context)
+        if (coarseLocationGranted) {
+            if (!WeatherUpdateWorker.isScheduled(context))
+                viewModel.scheduleInitialJob(context)
+
+            // TODO: Not a hack per se, but janky for sure, nuke eventually
+            if (uiState.weather == null) viewModel.refresh(context)
+        }
     }
 
     LaunchedEffect(lifecycleOwner) {
@@ -232,16 +237,23 @@ fun WeatherLayout(
                     }
                 }
 
-                else -> {
+                uiState.error != null -> {
                     Text(
                         text = "Something went wrong",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
 
-                // TODO: Handle erroneous states / lack of permissions somehow
+                else -> {
+                    // TODO: Not a hack per se, but janky for sure, nuke eventually
+                    LinearProgressIndicator()
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Fetching weather...",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
-
         }
     }
 }

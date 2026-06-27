@@ -28,21 +28,25 @@ class WeatherViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val isRefreshing = MutableStateFlow(false)
-
+    private val error = MutableStateFlow<String?>(null)
+    private val flags = combine(isRefreshing, error) { refreshing, error ->
+        refreshing to error
+    }
     val uiState: StateFlow<WeatherUiState> =
         combine(
             locationRepository.specifiedLocationFlow,
             locationRepository.currentLocationFlow,
             weatherRepository.weatherFlow,
             settingsRepository.settingsFlow,
-            isRefreshing
-        ) { specLocality, locality, weather, settings, isRefreshing ->
+            flags
+        ) { specLocality, locality, weather, settings, (refreshing, error) ->
             WeatherUiState(
                 specifiedLocality = specLocality?.locality,
                 currentLocality = locality?.locality,
                 weather = weather,
                 settings = settings,
-                isRefreshing = isRefreshing
+                isRefreshing = refreshing,
+                error = error
             )
         }
             .stateIn(
@@ -59,6 +63,7 @@ class WeatherViewModel @Inject constructor(
     fun refresh(context: Context) {
         viewModelScope.launch {
             isRefreshing.value = true
+            error.value = null
 
             try {
                 if (context.isOnline()) {
@@ -72,10 +77,12 @@ class WeatherViewModel @Inject constructor(
                 } else {
                     Timber.d("Can not refresh while offline")
                     Toast.makeText(context, "No internet connection", Toast.LENGTH_LONG).show()
+                    error.value = "No internet connection"
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to refresh")
                 Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
+                error.value = "Failed to refresh"
             } finally {
                 isRefreshing.value = false
             }
