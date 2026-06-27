@@ -46,10 +46,10 @@ fun DailyForecastRowConditions(
 
     val locale = LocalLocale.current.platformLocale
     val dayShortFormatter = remember(locale) {
-        SimpleDateFormat("dd/MM", locale)
+        SimpleDateFormat("EEE", locale)
     }
     val dayMonthFormatter = remember(locale) {
-        SimpleDateFormat("dd-MM", locale)
+        SimpleDateFormat("dd/MM", locale)
     }
 
     ForecastRow(
@@ -139,7 +139,7 @@ fun DailyForecastRowWind(
         SimpleDateFormat("EEE", locale)
     }
     val dayMonthFormatter = remember(locale) {
-        SimpleDateFormat("dd-MM", locale)
+        SimpleDateFormat("dd/MM", locale)
     }
 
     ForecastRow(

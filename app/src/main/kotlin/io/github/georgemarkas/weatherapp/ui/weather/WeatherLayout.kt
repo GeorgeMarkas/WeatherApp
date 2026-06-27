@@ -42,8 +42,6 @@ import io.github.georgemarkas.weatherapp.ui.weather.component.ForecastBox
 import io.github.georgemarkas.weatherapp.ui.weather.component.ForecastTab
 import io.github.georgemarkas.weatherapp.ui.weather.component.HourlyForecastRowConditions
 import io.github.georgemarkas.weatherapp.ui.weather.component.HourlyForecastRowWind
-import java.text.SimpleDateFormat
-import java.util.Date
 import kotlin.math.roundToInt
 
 @Composable
@@ -165,18 +163,19 @@ fun WeatherLayout(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    var temperatureMin = uiState.weather!!.daily?.temperatureMin?.get(0)
-                    var temperatureMax = uiState.weather!!.daily?.temperatureMax?.get(0)
-                    if (uiState.settings.units == Units.IMPERIAL) {
-                        temperatureMin = celsiusToFahrenheit(temperatureMin!!)
-                        temperatureMax = celsiusToFahrenheit(temperatureMax!!)
-                    }
+                    val temperatureMin = uiState.weather?.daily?.temperatureMin?.get(0)
+                        ?.let { if (uiState.settings.units == Units.IMPERIAL) celsiusToFahrenheit(it) else it }
+                        ?.toInt()
+
+                    val temperatureMax = uiState.weather?.daily?.temperatureMax?.get(0)
+                        ?.let { if (uiState.settings.units == Units.IMPERIAL) celsiusToFahrenheit(it) else it }
+                        ?.toInt()
 
                     Text(
-                        text = "Low $temperatureMin${temperatureUnit} • High $temperatureMax${temperatureUnit}",
+                        text = "Low ${temperatureMin ?: "—"}${temperatureUnit} • High ${temperatureMax ?: "—"}${temperatureUnit}",
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(MaterialTheme.dimens.spacing2))
 
 
                     val daily = uiState.weather?.daily
