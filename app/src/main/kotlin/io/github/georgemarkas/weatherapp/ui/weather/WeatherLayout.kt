@@ -121,7 +121,7 @@ fun WeatherLayout(
 
                 uiState.weather != null -> {
                     Text(
-                        text = if (uiState.settings.specificLocation) {
+                        text = if (uiState.settings.specifiedLocation) {
                             "${uiState.specifiedLocality}"
                         } else {
                             "${uiState.currentLocality}"

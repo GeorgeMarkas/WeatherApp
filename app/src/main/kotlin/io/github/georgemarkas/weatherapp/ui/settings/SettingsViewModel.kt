@@ -7,11 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.background.WeatherUpdateWorker
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
+import io.github.georgemarkas.weatherapp.exceptions.GeocodingException
 import io.github.georgemarkas.weatherapp.location.LocationWrapper
+import io.github.georgemarkas.weatherapp.openmeteo.models.geocoding.GeocodingResult
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.settings.models.UpdateInterval
-import io.github.georgemarkas.weatherapp.ui.settings.data.GeocodedLocation
-import io.github.georgemarkas.weatherapp.ui.settings.data.SettingsUiState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,22 +36,22 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val searchQuery = MutableStateFlow("")
-
     private val isSearching = MutableStateFlow(false)
+    private val searchResults = MutableStateFlow<List<GeocodingResult>?>(emptyList())
 
     val uiState: StateFlow<SettingsUiState> =
         combine(
-            locationRepository.specifiedLocationFlow,
             settingsRepository.settingsFlow,
-            settingsRepository.geocodedLocationsFlow,
+            locationRepository.specifiedLocationFlow,
+            searchResults,
             isSearching
-        ) { specifiedLocation, settings, searchResults, isSearching->
+        ) {  settings, location, results, isSearching ->
             SettingsUiState(
-                specifiedLocality = specifiedLocation?.locality,
-                specifiedAdmin1 = specifiedLocation?.admin1,
-                specifiedCountryCode = specifiedLocation?.countryCode,
                 settings = settings,
-                searchResults = searchResults,
+                specifiedLocality = location?.locality,
+                countryCode = location?.countryCode,
+                admin1 = location?.admin1,
+                searchResults = results,
                 isSearching = isSearching
             )
         }
@@ -68,28 +68,30 @@ class SettingsViewModel @Inject constructor(
             .distinctUntilChanged()
             .onEach { query ->
                 isSearching.value = true
-                settingsRepository.searchLocations(query)
-                    .onFailure { e ->
-                        Timber.e(e, "Geocoding search failed")
-                    }
-                isSearching.value = false
+                try {
+                    searchResults.value = locationRepository.searchLocations(query)
+                } catch (e: GeocodingException) {
+                    searchResults.value = emptyList()
+                    Timber.e(e)
+                    // TODO: Anton, add some sort of popup for this please
+                } finally {
+                    isSearching.value = false
+                }
             }
             .launchIn(viewModelScope)
     }
 
     fun updateGeolocationResults(query: String) {
         searchQuery.value = query
-        if (query.isBlank()) {
-            settingsRepository.clearSearchResults()
-        }
+        if (query.isBlank()) searchResults.value = emptyList()
     }
 
-    fun extractAndSetChoice(choice: GeocodedLocation) {
+    fun extractAndSetChoice(choice: GeocodingResult) {
         viewModelScope.launch {
             val location = LocationWrapper(
-                choice.latitude,
-                choice.longitude,
-                choice.name,
+                choice.latitude!!,
+                choice.longitude!!,
+                choice.admin3,
                 choice.countryCode,
                 choice.admin1
             )
@@ -114,7 +116,6 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setSpecificLocationEnabled(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.setSpecificLocationEnabled(enabled) }
+        viewModelScope.launch { settingsRepository.setSpecifiedLocation(enabled) }
     }
-
 }

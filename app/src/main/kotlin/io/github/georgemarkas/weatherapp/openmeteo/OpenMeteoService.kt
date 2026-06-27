@@ -57,7 +57,7 @@ class OpenMeteoService @Inject constructor(
      * Fetches a list of matching locations for the given string query from OpenMeteo's
      * geocoding API.
      */
-    suspend fun requestGeocodedLocations(query: String): Result<GeocodingResponse> {
+    suspend fun requestLocations(query: String): Result<GeocodingResponse> {
         return runCatching { geocodingApiImpl.searchLocations(query) }
     }
 

@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.georgemarkas.weatherapp.R
 import io.github.georgemarkas.weatherapp.settings.models.Units
 import io.github.georgemarkas.weatherapp.settings.models.UpdateInterval
 import io.github.georgemarkas.weatherapp.ui.settings.composables.LocationSearchBar
@@ -53,15 +54,15 @@ fun SettingsScreen(
     val settings = uiState.settings
     val context = LocalContext.current
 
-    var locationPreferenceSpecific  by rememberSaveable(settings.specificLocation) {
-        mutableStateOf(settings.specificLocation)
+    var specifiedLocationToggle by rememberSaveable(settings.specifiedLocation) {
+        mutableStateOf(settings.specifiedLocation)
     }
 
-    var showUnitDialog                      by remember { mutableStateOf(false) }
-    var showUpdateIntervalDialog            by remember { mutableStateOf(false) }
-    var showLocationPreferenceDialog        by remember { mutableStateOf(false) }
-    var showWeatherAlertsDialog             by remember { mutableStateOf(false) }
-    var showLocationPreferenceFieldDialog   by remember { mutableStateOf(false) }
+    var showUnitDialog by remember { mutableStateOf(false) }
+    var showUpdateIntervalDialog by remember { mutableStateOf(false) }
+    var showLocationPreferenceDialog by remember { mutableStateOf(false) }
+    var showWeatherAlertsDialog by remember { mutableStateOf(false) }
+    var showLocationPreferenceFieldDialog by remember { mutableStateOf(false) }
 
     if (showUnitDialog) {
         PopupDialog(onDismissRequest = { showUnitDialog = false }) {
@@ -74,6 +75,7 @@ fun SettingsScreen(
             }
         }
     }
+
     if (showUpdateIntervalDialog) {
         PopupDialog(onDismissRequest = { showUpdateIntervalDialog = false }) {
             UpdateInterval.entries.forEach { interval ->
@@ -85,20 +87,22 @@ fun SettingsScreen(
             }
         }
     }
+
     if (showLocationPreferenceDialog) {
         PopupDialog(onDismissRequest = { showLocationPreferenceDialog = false }) {
             RadioRow(
-                label = "Use Current Location",
-                selected = !locationPreferenceSpecific,
+                label = stringResource(R.string.setting_location_source_popup_current),
+                selected = !specifiedLocationToggle,
                 onSelect = { viewModel.setSpecificLocationEnabled(false) }
             )
             RadioRow(
-                label = "Use Specified Location",
-                selected = locationPreferenceSpecific,
+                label = stringResource(R.string.setting_location_source_popup_custom),
+                selected = specifiedLocationToggle,
                 onSelect = { viewModel.setSpecificLocationEnabled(true) }
             )
         }
     }
+
     if (showWeatherAlertsDialog) {
         PopupDialog(onDismissRequest = { showWeatherAlertsDialog = false }) {
             Row(
@@ -115,6 +119,7 @@ fun SettingsScreen(
             }
         }
     }
+
     if (showLocationPreferenceFieldDialog) {
         PopupDialog(onDismissRequest = { showLocationPreferenceFieldDialog = false }) {
             Row(
@@ -135,7 +140,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.settings_header)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -157,20 +162,20 @@ fun SettingsScreen(
             SettingsGroupCard(
                 items = listOf(
                     SettingsItem(
-                        "Unit type",
-                        "Metric/Imperial",
+                        stringResource(R.string.setting_units),
+                        stringResource(R.string.setting_units_description),
                         Icons.Default.Build,
-                        onClick = { showUnitDialog = true}
+                        onClick = { showUnitDialog = true }
                     ),
                     SettingsItem(
-                        "Background Updates",
-                        "Update interval",
+                        stringResource(R.string.setting_update_interval),
+                        stringResource(R.string.setting_update_interval_description),
                         Icons.Default.Refresh,
                         onClick = { showUpdateIntervalDialog = true }
                     ),
                     SettingsItem(
-                        "Weather Alerts",
-                        "Enable/Disable Alerts",
+                        stringResource(R.string.setting_weather_alerts),
+                        stringResource(R.string.setting_weather_alerts_description),
                         Icons.Default.Notifications,
                         composable = {
                             Switch(
@@ -187,23 +192,23 @@ fun SettingsScreen(
             SettingsGroupCard(
                 items = listOf(
                     SettingsItem(
-                        "Location Preferences",
-                        "Use Current/Specify Location",
+                        stringResource(R.string.setting_location_source),
+                        stringResource(R.string.setting_location_source_description),
                         Icons.Default.Place,
                         onClick = { showLocationPreferenceDialog = true }
                     ),
                     SettingsItem(
                         if (uiState.specifiedLocality == null) {
-                            "Specify Location..."
+                            "No location specified"
                         } else {
                             "${uiState.specifiedLocality}, " +
-                                    "${uiState.specifiedAdmin1}, " +
-                                    uiState.specifiedCountryCode
+                                    "${uiState.admin1}, " +
+                                    uiState.countryCode
                         },
-                        "Custom Location Field",
+                        null,
                         Icons.Default.Edit,
-                        isActive = locationPreferenceSpecific,
-                        onClick = {showLocationPreferenceFieldDialog = true}
+                        isActive = specifiedLocationToggle,
+                        onClick = { showLocationPreferenceFieldDialog = true }
                     )
                 )
             )

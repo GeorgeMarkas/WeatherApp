@@ -10,9 +10,6 @@ import io.github.georgemarkas.weatherapp.data.LocationRepository
 import io.github.georgemarkas.weatherapp.data.SettingsRepository
 import io.github.georgemarkas.weatherapp.data.WeatherRepository
 import io.github.georgemarkas.weatherapp.extensions.isOnline
-import io.github.georgemarkas.weatherapp.location.LocationWrapper
-import io.github.georgemarkas.weatherapp.settings.models.Units
-import io.github.georgemarkas.weatherapp.settings.models.UpdateInterval
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -63,7 +60,7 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch {
             isRefreshing.value = true
 
-            val preferenceSpecific = settingsRepository.settingsFlow.first().specificLocation
+            val preferenceSpecific = settingsRepository.settingsFlow.first().specifiedLocation
             try {
                 if (context.isOnline()) {
                     // TODO: Use the user-specified location should it be chosen from settings

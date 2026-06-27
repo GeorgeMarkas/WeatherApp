@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 
 data class SettingsItem(
     val title: String,
-    val subtitle: String,
+    val subtitle: String?,
     val icon: ImageVector,
     val isActive: Boolean = true,
     val onClick: (() -> Unit)? = null,
@@ -67,7 +67,7 @@ fun SettingsTile(item: SettingsItem) {
         modifier = Modifier
             .fillMaxWidth()
             .then(
-                if (item.onClick != null) Modifier.clickable(enabled = item.isActive )
+                if (item.onClick != null) Modifier.clickable(enabled = item.isActive)
                 { item.onClick() } else Modifier
             )
             .alpha(if (item.isActive) 1f else 0.38f)
@@ -79,13 +79,21 @@ fun SettingsTile(item: SettingsItem) {
             modifier = Modifier.padding(end = 16.dp)
         )
         Column {
-            Text(text = item.title, style = MaterialTheme.typography.bodyLarge)
-            Text(text = item.subtitle, style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.bodyLarge
+            )
 
+            item.subtitle?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
-        Column{
+        Column {
             item.composable?.invoke()
         }
     }

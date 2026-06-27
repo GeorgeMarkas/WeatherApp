@@ -7,5 +7,5 @@ data class Settings(
     val updateInterval: UpdateInterval = UpdateInterval.DEFAULT,
     val units: Units = Units.METRIC,
     val weatherAlerts: Boolean = false,
-    val specificLocation: Boolean = false,
+    val specifiedLocation: Boolean = false,
 )

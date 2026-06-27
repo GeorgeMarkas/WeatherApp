@@ -16,9 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.georgemarkas.weatherapp.R
 import io.github.georgemarkas.weatherapp.ui.settings.SettingsViewModel
-import io.github.georgemarkas.weatherapp.ui.settings.data.SettingsUiState
+import io.github.georgemarkas.weatherapp.ui.settings.SettingsUiState
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,8 +31,7 @@ fun LocationSearchBar(
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-    var query by remember {mutableStateOf("")}
-
+    var query by remember { mutableStateOf("") }
 
     val suggestions = uiState.searchResults
     ExposedDropdownMenuBox(
@@ -40,14 +42,14 @@ fun LocationSearchBar(
             value = query,
             onValueChange = { newValue ->
                 val filtered = newValue
-                    .filterNot { it == '\n' || it == '\r'}
+                    .filterNot { it == '\n' || it == '\r' }
                     .take(30)
                 query = filtered
                 settingsViewModel.updateGeolocationResults(query)
             },
             singleLine = true,
-            label = { Text("Location Preference") },
-            placeholder = { Text("Enter Location...") },
+            label = { stringResource(R.string.location_search_label) },
+            placeholder = { stringResource(R.string.location_search_placeholder) },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                 .fillMaxWidth(),
@@ -75,13 +77,18 @@ fun LocationSearchBar(
                     onClick = {},
                     enabled = false
                 )
-            }else {
+            } else {
                 suggestions.forEach { suggestion ->
                     DropdownMenuItem(
-                        text = { Text("${suggestion.name}, ${suggestion.admin1}, ${suggestion.countryCode}") },
+                        text = {
+                            Text("${suggestion.name}, ${suggestion.admin1}, ${suggestion.countryCode}")
+                        },
                         onClick = {
                             settingsViewModel.extractAndSetChoice(suggestion)
-                            query = suggestion.name
+                            query = suggestion.name ?: run {
+                                Timber.e("Suggestion name annulled")
+                                "null"
+                            }
                             expanded = false
                         }
                     )

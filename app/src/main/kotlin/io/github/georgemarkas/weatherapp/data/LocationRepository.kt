@@ -6,9 +6,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.georgemarkas.weatherapp.exceptions.GeocodingException
 import io.github.georgemarkas.weatherapp.geocoding.GeocodingService
 import io.github.georgemarkas.weatherapp.location.LocationService
 import io.github.georgemarkas.weatherapp.location.LocationWrapper
+import io.github.georgemarkas.weatherapp.openmeteo.OpenMeteoService
+import io.github.georgemarkas.weatherapp.openmeteo.models.geocoding.GeocodingResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -23,7 +26,8 @@ val Context.specifiedLocationDataStore by preferencesDataStore(name = "specified
 class LocationRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val locationService: LocationService,
-    private val geocodingService: GeocodingService
+    private val geocodingService: GeocodingService,
+    private val openMeteoService: OpenMeteoService
 ) {
     companion object {
         val CURRENT_LATITUDE = doublePreferencesKey("current_latitude")
@@ -32,8 +36,9 @@ class LocationRepository @Inject constructor(
 
         val SPECIFIED_LATITUDE = doublePreferencesKey("specified_latitude")
         val SPECIFIED_LONGITUDE = doublePreferencesKey("specified_longitude")
-        val SPECIFIED_LOCALITY =  stringPreferencesKey("specified_locality")
+        val SPECIFIED_LOCALITY = stringPreferencesKey("specified_locality")
 
+        // These are only applicable to specified location
         val COUNTRY_CODE = stringPreferencesKey("country_code")
         val ADMIN1 = stringPreferencesKey("admin1")
 
@@ -45,10 +50,14 @@ class LocationRepository @Inject constructor(
             val latitude = preferences[CURRENT_LATITUDE] ?: return@map null
             val longitude = preferences[CURRENT_LONGITUDE] ?: return@map null
             val locality = preferences[CURRENT_LOCALITY] ?: return@map null
-            val countryCode = preferences[COUNTRY_CODE] ?: return@map null
-            val admin1 = preferences[ADMIN1] ?: return@map null
 
-            LocationWrapper(latitude, longitude, locality, countryCode, admin1)
+            LocationWrapper(
+                latitude,
+                longitude,
+                locality,
+                null,
+                null
+            )
         }
 
     val specifiedLocationFlow: Flow<LocationWrapper?> =
@@ -59,7 +68,13 @@ class LocationRepository @Inject constructor(
             val countryCode = preferences[COUNTRY_CODE] ?: return@map null
             val admin1 = preferences[ADMIN1] ?: return@map null
 
-            LocationWrapper(latitude, longitude, locality, countryCode, admin1)
+            LocationWrapper(
+                latitude,
+                longitude,
+                locality,
+                countryCode,
+                admin1
+            )
         }
 
     /**
@@ -76,7 +91,15 @@ class LocationRepository @Inject constructor(
 
         val locality = geocodingService.getLocality(coords.latitude, coords.longitude)
 
-        storeCurrentLocation(LocationWrapper(coords.latitude, coords.longitude, locality, null, null))
+        storeCurrentLocation(
+            LocationWrapper(
+                coords.latitude,
+                coords.longitude,
+                locality,
+                null,
+                null
+            )
+        )
         Timber.i("Updated current location")
     }
 
@@ -88,6 +111,25 @@ class LocationRepository @Inject constructor(
         Timber.i("Updated specified location")
     }
 
+    suspend fun searchLocations(query: String?): List<GeocodingResult>? {
+        if (query == null) return emptyList()
+        val locations = openMeteoService.requestLocations(query)
+
+        return locations.fold(
+            onSuccess = { response ->
+                if (response.error == null) {
+                    response.results
+                } else {
+                    val reason = response.reason ?: "Unknown error; OpenMeteo provided no reason"
+                    throw GeocodingException("OpenMeteo responded with error: $reason")
+                }
+            },
+            onFailure = { e ->
+                throw GeocodingException("Failed to fetch location results", e)
+            }
+        )
+    }
+
     private suspend fun storeCurrentLocation(location: LocationWrapper) {
         context.currentLocationDataStore.edit { preferences ->
             preferences[CURRENT_LATITUDE] = location.latitude
@@ -96,8 +138,6 @@ class LocationRepository @Inject constructor(
                 Timber.e("Geocoder failed to supply the locality name")
                 GEOCODER_ERROR_LOCALITY_PLACEHOLDER
             }
-            preferences[COUNTRY_CODE] = location.countryCode?: ""
-            preferences[ADMIN1] = location.admin1?: ""
             Timber.d("Stored current location in DataStore")
         }
     }
@@ -106,9 +146,18 @@ class LocationRepository @Inject constructor(
         context.specifiedLocationDataStore.edit { preferences ->
             preferences[SPECIFIED_LATITUDE] = location.latitude
             preferences[SPECIFIED_LONGITUDE] = location.longitude
-            preferences[SPECIFIED_LOCALITY] = location.locality!!
-            preferences[COUNTRY_CODE] = location.countryCode!!
-            preferences[ADMIN1] = location.admin1!!
+            preferences[SPECIFIED_LOCALITY] = location.locality ?: run {
+                Timber.d("Locality is null")
+                ""
+            }
+            preferences[COUNTRY_CODE] = location.countryCode ?: run {
+                Timber.d("Country code is null")
+                ""
+            }
+            preferences[ADMIN1] = location.admin1 ?: run {
+                Timber.d("Admin1 is null")
+                ""
+            }
             Timber.d("Stored specified location in DataStore")
         }
     }
