@@ -29,7 +29,6 @@ fun LocationSearchBar(
     settingsViewModel: SettingsViewModel,
     uiState: SettingsUiState
 ) {
-
     var expanded by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
 
@@ -48,6 +47,11 @@ fun LocationSearchBar(
                     .filterNot { it == '\n' || it == '\r' }
                     .take(30)
                 query = filtered
+                if (filtered.isEmpty()) {
+                    settingsViewModel.clearSearchResults()
+                } else {
+                    settingsViewModel.updateGeolocationResults(filtered)
+                }
                 settingsViewModel.updateGeolocationResults(query)
             },
             singleLine = true,

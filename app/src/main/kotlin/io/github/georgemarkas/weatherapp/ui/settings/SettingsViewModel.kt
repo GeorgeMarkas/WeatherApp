@@ -45,7 +45,7 @@ class SettingsViewModel @Inject constructor(
             locationRepository.specifiedLocationFlow,
             searchResults,
             isSearching
-        ) {  settings, location, results, isSearching ->
+        ) { settings, location, results, isSearching ->
             SettingsUiState(
                 settings = settings,
                 specifiedLocality = location?.locality,
@@ -82,6 +82,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun clearSearchResults() {
+        searchQuery.value = ""
         searchResults.value = emptyList()
     }
 
