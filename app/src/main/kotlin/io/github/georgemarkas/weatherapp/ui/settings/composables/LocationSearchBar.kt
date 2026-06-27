@@ -31,8 +31,8 @@ fun LocationSearchBar(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
-
     val suggestions = uiState.searchResults
+
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = {
