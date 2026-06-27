@@ -36,11 +36,9 @@ class LocationRepository @Inject constructor(
 
         val SPECIFIED_LATITUDE = doublePreferencesKey("specified_latitude")
         val SPECIFIED_LONGITUDE = doublePreferencesKey("specified_longitude")
-        val SPECIFIED_LOCALITY = stringPreferencesKey("specified_locality") // This is Admin3
-
-        // These are only applicable to specified location
         val COUNTRY_CODE = stringPreferencesKey("country_code")
         val ADMIN1 = stringPreferencesKey("admin1")
+        val ADMIN3 = stringPreferencesKey("admin3")// OpenMeteo's locality equivalent
         val ADMIN4 = stringPreferencesKey("admin4")
 
         private const val GEOCODER_ERROR_LOCALITY_PLACEHOLDER = "Rivendell"
@@ -66,15 +64,15 @@ class LocationRepository @Inject constructor(
         context.specifiedLocationDataStore.data.map { preferences ->
             val latitude = preferences[SPECIFIED_LATITUDE] ?: return@map null
             val longitude = preferences[SPECIFIED_LONGITUDE] ?: return@map null
-            val locality = preferences[SPECIFIED_LOCALITY] ?: return@map null
             val countryCode = preferences[COUNTRY_CODE] ?: return@map null
             val admin1 = preferences[ADMIN1] ?: return@map null
+            val admin3 = preferences[ADMIN3] ?: return@map null
             val admin4 = preferences[ADMIN4] ?: return@map null
 
             LocationWrapper(
                 latitude,
                 longitude,
-                locality,
+                admin3,
                 countryCode,
                 admin1,
                 admin4
@@ -151,7 +149,7 @@ class LocationRepository @Inject constructor(
         context.specifiedLocationDataStore.edit { preferences ->
             preferences[SPECIFIED_LATITUDE] = location.latitude
             preferences[SPECIFIED_LONGITUDE] = location.longitude
-            preferences[SPECIFIED_LOCALITY] = location.locality ?: run {
+            preferences[ADMIN3] = location.locality ?: run {
                 Timber.d("Locality is null")
                 GEOCODER_ERROR_LOCALITY_PLACEHOLDER
             }

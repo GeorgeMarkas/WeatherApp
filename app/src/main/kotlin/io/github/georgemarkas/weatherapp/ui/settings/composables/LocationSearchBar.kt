@@ -52,7 +52,6 @@ fun LocationSearchBar(
                 } else {
                     settingsViewModel.updateGeolocationResults(filtered)
                 }
-                settingsViewModel.updateGeolocationResults(query)
             },
             singleLine = true,
             label = { Text(stringResource(R.string.location_search_label)) },
