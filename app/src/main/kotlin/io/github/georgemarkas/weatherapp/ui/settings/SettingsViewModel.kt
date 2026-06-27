@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -65,7 +64,9 @@ class SettingsViewModel @Inject constructor(
         searchQuery
             .debounce(600.milliseconds)
             .filter { it.isNotBlank() }
-            .distinctUntilChanged()
+            // TODO: Implement this properly, as of now it re-hits the API
+            //  but at least the behavior is what the user would expect
+//            .distinctUntilChanged()
             .onEach { query ->
                 isSearching.value = true
                 try {
