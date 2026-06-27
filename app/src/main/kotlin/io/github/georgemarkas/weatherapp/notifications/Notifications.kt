@@ -77,7 +77,7 @@ object Notifications {
         val notification = NotificationCompat.Builder(context, CHANNEL_ALERT)
             .setContentTitle(title)
             .setContentText(AlertFormatter.message(context, mostSevere, units))
-            .setSmallIcon(R.drawable.ic_notify_warning)
+            .setSmallIcon(R.drawable.warning_24px)
             .setPriority(mostSevere.severity.toPriority())
             .setOnlyAlertOnce(true)
             .setAutoCancel(true)

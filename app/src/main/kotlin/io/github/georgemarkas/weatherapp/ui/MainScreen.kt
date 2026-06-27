@@ -18,7 +18,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import io.github.georgemarkas.weatherapp.R
@@ -59,20 +60,26 @@ fun WeatherScreen(
         label = "weather_settings_transition",
     ) { settingsVisible ->
         if (settingsVisible) {
-            SettingsScreen(onBack = { showSettings = false }, viewModel = settingsViewModel)
+            SettingsScreen(onBack = {
+                @Suppress("AssignedValueIsNeverRead")
+                showSettings = false
+            }, viewModel = settingsViewModel)
         } else {
             Box(modifier = modifier.fillMaxSize()) {
                 WeatherLayout(viewModel = weatherViewModel)
 
                 IconButton(
-                    onClick = { showSettings = true },
+                    onClick = {
+                        @Suppress("AssignedValueIsNeverRead")
+                        showSettings = true
+                    },
                     modifier = modifier
                         .align(Alignment.TopEnd)
                         .statusBarsPadding()
                         .padding(8.dp)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_settings),
+                        ImageVector.vectorResource(R.drawable.settings_24px),
                         contentDescription = "Settings"
                     )
                 }

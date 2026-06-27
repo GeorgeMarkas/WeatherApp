@@ -9,13 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +37,7 @@ import io.github.georgemarkas.weatherapp.ui.settings.composables.LocationSearchB
 import io.github.georgemarkas.weatherapp.ui.settings.composables.PopupDialog
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsGroupCard
 import io.github.georgemarkas.weatherapp.ui.settings.composables.SettingsItem
+import androidx.compose.ui.res.vectorResource
 
 @Suppress("AssignedValueIsNeverRead")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -145,7 +140,7 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                            ImageVector.vectorResource(R.drawable.arrow_back_24px),
                             contentDescription = "Back"
                         )
                     }
@@ -165,19 +160,19 @@ fun SettingsScreen(
                     SettingsItem(
                         stringResource(R.string.setting_units),
                         stringResource(R.string.setting_units_description),
-                        Icons.Default.Build,
+                        ImageVector.vectorResource(R.drawable.measuring_tape_24px),
                         onClick = { showUnitDialog = true }
                     ),
                     SettingsItem(
                         stringResource(R.string.setting_update_interval),
                         stringResource(R.string.setting_update_interval_description),
-                        Icons.Default.Refresh,
+                        ImageVector.vectorResource(R.drawable.refresh_24px),
                         onClick = { showUpdateIntervalDialog = true }
                     ),
                     SettingsItem(
                         stringResource(R.string.setting_weather_alerts),
                         stringResource(R.string.setting_weather_alerts_description),
-                        Icons.Default.Notifications,
+                        ImageVector.vectorResource(R.drawable.notifications_24px),
                         composable = {
                             Switch(
                                 checked = settings.weatherAlerts,
@@ -195,7 +190,7 @@ fun SettingsScreen(
                     SettingsItem(
                         stringResource(R.string.setting_location_source),
                         stringResource(R.string.setting_location_source_description),
-                        Icons.Default.Place,
+                        ImageVector.vectorResource(R.drawable.location_on_24px),
                         onClick = { showLocationPreferenceDialog = true }
                     ),
                     SettingsItem(
@@ -211,7 +206,7 @@ fun SettingsScreen(
                                 .joinToString(", ")
                         },
                         null,
-                        Icons.Default.Edit,
+                        ImageVector.vectorResource(R.drawable.edit_location_alt_24px),
                         isActive = specifiedLocationToggle,
                         onClick = { showLocationPreferenceFieldDialog = true }
                     )
